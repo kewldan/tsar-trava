@@ -33,11 +33,24 @@ export function Cursor() {
     let ry = my
     let raf = 0
 
+    // Масштаб держим здесь же и вписываем внутрь transform.
+    // Отдельное CSS-свойство scale применяется СНАРУЖИ transform и
+    // домножает translate3d — кольцо уезжало к началу координат.
+    let press = 1
+    let pressTarget = 1
+    let dotScale = 1
+    let dotTarget = 1
+
     const tick = () => {
       rx = lerp(rx, mx, 0.16)
       ry = lerp(ry, my, 0.16)
-      d.style.transform = `translate3d(${mx}px, ${my}px, 0)`
-      r.style.transform = `translate3d(${rx}px, ${ry}px, 0)`
+      press = lerp(press, pressTarget, 0.22)
+      dotScale = lerp(dotScale, dotTarget, 0.2)
+
+      // scale стоит после translate: масштабирование идёт вокруг центра
+      // самого элемента и его положения не меняет
+      d.style.transform = `translate3d(${mx}px, ${my}px, 0) scale(${dotScale.toFixed(3)})`
+      r.style.transform = `translate3d(${rx}px, ${ry}px, 0) scale(${press.toFixed(3)})`
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
@@ -53,6 +66,7 @@ export function Cursor() {
 
       if (!el) {
         w.classList.remove('is-hover', 'is-drag', 'has-label')
+        dotTarget = 1
         setLabel('')
         return
       }
@@ -62,15 +76,17 @@ export function Cursor() {
       w.classList.toggle('is-drag', kind === 'drag')
       w.classList.toggle('is-hover', kind !== 'drag')
       w.classList.toggle('has-label', Boolean(text))
+      // Внутри раздутого кольца точка не нужна
+      dotTarget = 0
       setLabel(text)
     }
 
     const onLeave = () => w.classList.add('is-hidden')
     const onDown = () => {
-      r.style.setProperty('scale', '0.82')
+      pressTarget = 0.82
     }
     const onUp = () => {
-      r.style.setProperty('scale', '1')
+      pressTarget = 1
     }
 
     window.addEventListener('pointermove', onMove, { passive: true })

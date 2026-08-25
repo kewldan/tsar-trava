@@ -253,9 +253,8 @@
   margin: -3px 0 0 -3px;
   border-radius: 50%;
   background: var(--cream);
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s var(--ease-spring);
+  /* transform пишет JS каждый кадр — переход по нему только мешал бы */
+  transition: opacity 0.25s ease;
 }
 
 .cursor__ring {
@@ -281,10 +280,6 @@
   border-color: rgba(242, 240, 234, 0.9);
   background: rgba(242, 240, 234, 0.08);
 }
-.cursor.is-hover .cursor__dot {
-  transform: scale(0);
-}
-
 .cursor.is-drag .cursor__ring {
   width: 92px;
   height: 92px;
