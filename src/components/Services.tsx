@@ -1,6 +1,6 @@
 import { SERVICES } from '../content'
-import { Reveal } from './ui/Primitives'
 import { useTilt } from '../lib/hooks'
+import { Reveal } from './ui/primitives'
 
 const ICONS: Record<string, React.ReactNode> = {
   mower: (
@@ -64,6 +64,7 @@ function Card({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
           <span className="svc__num mono">{s.num}</span>
           <span className="svc__icon" aria-hidden="true">
             <svg
+              aria-hidden="true"
               viewBox="0 0 44 44"
               fill="none"
               stroke="currentColor"
@@ -91,7 +92,15 @@ function Card({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
         <footer className="svc__foot">
           <span className="svc__price">{s.price}</span>
           <span className="svc__go" aria-hidden="true">
-            <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.4">
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 16 16"
+              width="15"
+              height="15"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+            >
               <path d="M3 13 13 3M6 3h7v7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </span>

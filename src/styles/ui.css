@@ -538,7 +538,7 @@
   color: var(--brass);
 }
 .nav__link::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 13px;
   right: 13px;

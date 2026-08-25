@@ -1,0 +1,180 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.10/schema.json",
+
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+
+  "files": {
+    "includes": [
+      "**",
+      "!dist",
+      "!node_modules",
+      // Сгенерированные данные и бинарные ассеты форматировать незачем
+      "!src/data/*.json",
+      "!public/team",
+      "!docs/screenshots",
+      "!package-lock.json"
+    ]
+  },
+
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 118,
+    "lineEnding": "lf"
+  },
+
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "jsxQuoteStyle": "double",
+      "semicolons": "asNeeded",
+      "trailingCommas": "all",
+      "arrowParentheses": "always",
+      "bracketSameLine": false,
+      "quoteProperties": "asNeeded"
+    }
+  },
+
+  "json": {
+    "formatter": { "trailingCommas": "none" }
+  },
+
+  "linter": {
+    "enabled": true,
+    "rules": {
+      // Строгий режим: включено всё, что Biome умеет. Каждое исключение
+      // ниже выключено осознанно и с причиной — списка «чтобы замолчало» нет.
+      "preset": "all",
+
+      // Nursery — правила в разработке: их поведение меняется между релизами
+      // и способно уронить CI на ровном месте при обновлении Biome.
+      "nursery": "off",
+
+      "suspicious": {
+        // Правило для Solid: считает className/htmlFor чужеродными.
+        // Здесь React, для него это единственно верные имена пропов.
+        "noReactSpecificProps": "off",
+        // Вывод типов Biome ещё неполон и на guard'ах по ссылкам врёт:
+        // на одинаковых `const el = ref.current; if (!el) return` выдаёт
+        // то «условие всегда истинно», то «всегда ложно». Ref пуст до
+        // монтирования и после размонтирования — убрать эти проверки
+        // значит уронить страницу. Вернуть, когда вывод типов дозреет.
+        "noUnnecessaryConditions": "off"
+      },
+
+      "security": {
+        // Ложно срабатывает на длинные data: URI со встроенными SVG
+        // (фавикон, иконка селекта) — принимает их за утёкшие ключи.
+        "noSecrets": "off"
+      },
+
+      "correctness": {
+        // Требует расширения в импортах. TypeScript и Vite резолвят пути
+        // сами, дописывать .tsx — вносить ложную точность.
+        "useImportExtensions": "off",
+        // Резолвер Biome не видит экспортов ряда пакетов и сообщает,
+        // что в react нет Suspense. Ложные срабатывания.
+        "noUnresolvedImports": "off",
+        // id секций — якоря навигации и целей прокрутки. useId() выдаёт
+        // случайные значения и ломает и то, и другое.
+        "useUniqueElementIds": "off",
+        // Правила Solid и Qwik
+        "noSolidDestructuredProps": "off",
+        "useQwikValidLexicalScope": "off",
+        // Правило Next.js
+        "noBeforeInteractiveScriptOutsideDocument": "off"
+      },
+
+      "performance": {
+        // import * as THREE from 'three' — канонический способ работы
+        // с three.js, других вариантов библиотека не предлагает.
+        "noNamespaceImport": "off",
+        // Правила Solid, Qwik и Next.js
+        "useSolidForComponent": "off",
+        "noJsxPropsBind": "off",
+        "noImgElement": "off"
+      },
+
+      "style": {
+        // Сайт наполовину состоит из графики: коэффициенты шейдеров, координаты
+        // viewBox, тайминги анимаций. Вынести 362 числа в константы — сделать
+        // код нечитаемым ради формального соответствия.
+        "noMagicNumbers": "off",
+        // Весь копирайт и так вынесен в src/content.ts. Оставшиеся литералы
+        // в JSX — структурные подписи, прятать их некуда.
+        "noJsxLiterals": "off",
+        // Тернарник в JSX — основной способ ветвления разметки.
+        "noTernary": "off",
+        // Код работает только в браузере, window точнее globalThis.
+        "useGlobalThis": "off",
+        // Палитра задана шестнадцатеричными цветами и продублирована
+        // в GLSL, где никакой другой записи нет.
+        "noHexColors": "off",
+        // Счётчики циклов
+        "noIncrementDecrement": "off",
+        // continue в фильтрующем цикле читается лучше вложенного if.
+        "noContinue": "off",
+        // Секция страницы — это разметка, длина файла ничего не говорит
+        // о его сложности.
+        "noExcessiveLinesPerFile": "off",
+        // THREE — имя из документации three.js и всех её примеров.
+        // PascalCase здесь сбивал бы с толку.
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "conventions": [{ "selector": { "kind": "importNamespace" }, "formats": ["CONSTANT_CASE"] }]
+          }
+        }
+      },
+
+      "complexity": {
+        // Тот же довод, что и для длины файла: JSX длинный по своей природе.
+        "noExcessiveLinesPerFunction": "off",
+        // !important нужен ровно там, где перебиваются inline-стили,
+        // которые GSAP навешивает на элементы во время анимации.
+        "noImportantStyles": "off"
+      }
+    }
+  },
+
+  "assist": {
+    "enabled": true,
+    "actions": { "source": { "organizeImports": "on" } }
+  },
+
+  "overrides": [
+    {
+      // Скрипты — консольные утилиты для Node: вывод в консоль это их работа,
+      // системные модули и последовательные await — тоже.
+      "includes": ["scripts/**"],
+      "linter": {
+        "rules": {
+          "suspicious": { "noConsole": "off" },
+          "correctness": { "noNodejsModules": "off", "noProcessGlobal": "off" },
+          "performance": { "noAwaitInLoops": "off" }
+        }
+      }
+    },
+    {
+      // react-three-fiber расширяет JSX элементами three.js: <mesh>,
+      // <shaderMaterial>, <instancedMesh> и их пропами. Для Biome это
+      // неизвестные теги и атрибуты — проверять их он не умеет.
+      "includes": ["src/three/**"],
+      "linter": {
+        "rules": {
+          "suspicious": { "noUnknownAttribute": "off" }
+        }
+      }
+    },
+    {
+      // Конфиг Vite обязан экспортировать значение по умолчанию.
+      "includes": ["vite.config.ts"],
+      "linter": {
+        "rules": {
+          "style": { "noDefaultExport": "off" }
+        }
+      }
+    }
+  ]
+}

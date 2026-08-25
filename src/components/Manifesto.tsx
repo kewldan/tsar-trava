@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { MANIFESTO, STATS } from '../content'
-import { Reveal, Counter } from './ui/Primitives'
 import { clamp } from '../lib/hooks'
+import { Counter, Reveal } from './ui/primitives'
 
 /**
  * Манифест: длинная фраза, которая проявляется слово за словом
@@ -15,7 +15,9 @@ function ScrollText({ text }: { text: string }) {
   useEffect(() => {
     let raf = 0
     const on = () => {
-      if (raf) return
+      if (raf) {
+        return
+      }
       raf = requestAnimationFrame(() => {
         const el = ref.current
         if (!el) {
@@ -37,7 +39,9 @@ function ScrollText({ text }: { text: string }) {
     return () => {
       window.removeEventListener('scroll', on)
       window.removeEventListener('resize', on)
-      if (raf) cancelAnimationFrame(raf)
+      if (raf) {
+        cancelAnimationFrame(raf)
+      }
     }
   }, [])
 
@@ -48,6 +52,7 @@ function ScrollText({ text }: { text: string }) {
         const step = 1 / words.length
         const local = clamp((p - i * step * 0.72) / (step * 2.6), 0, 1)
         return (
+          // biome-ignore lint/suspicious/noArrayIndexKey: слова манифеста не сортируются и не фильтруются, порядок фиксирован
           <Fragment key={i}>
             <span
               className="manifest__word"

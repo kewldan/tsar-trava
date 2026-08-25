@@ -1,6 +1,6 @@
-import { BRAND, FOOTER, CONTACTS } from '../content'
-import { Reveal, Magnetic } from './ui/Primitives'
+import { BRAND, CONTACTS, FOOTER } from '../content'
 import { useScrollTo } from '../lib/hooks'
+import { Magnetic, Reveal } from './ui/primitives'
 
 export function Footer() {
   const scrollTo = useScrollTo()
@@ -71,9 +71,9 @@ export function Footer() {
             <nav className="footer__col" key={c.t} aria-label={c.t}>
               <h4 className="mono brass">{c.t}</h4>
               <ul>
-                {c.links.map((l, i) => (
-                  <li key={`${l.label}-${i}`}>
-                    <button onClick={() => scrollTo(l.to)} data-cursor="hover">
+                {c.links.map((l) => (
+                  <li key={`${l.to}-${l.label}`}>
+                    <button type="button" onClick={() => scrollTo(l.to)} data-cursor="hover">
                       <span>{l.label}</span>
                       <i aria-hidden="true" />
                     </button>
@@ -90,16 +90,28 @@ export function Footer() {
           </span>
           <span className="mono dim">{FOOTER.legal}</span>
           <button
+            type="button"
             className="footer__up mono"
             onClick={() => {
               const l = (window as unknown as { __lenis?: { scrollTo: (t: number, o?: object) => void } }).__lenis
-              if (l) l.scrollTo(0, { duration: 1.6 })
-              else window.scrollTo({ top: 0, behavior: 'smooth' })
+              if (l) {
+                l.scrollTo(0, { duration: 1.6 })
+              } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+              }
             }}
             data-cursor="hover"
           >
             наверх
-            <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 16 16"
+              width="13"
+              height="13"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
               <path d="M8 13V3M4 7l4-4 4 4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>

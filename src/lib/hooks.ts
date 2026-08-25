@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState, useCallback, type RefObject } from 'react'
+import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
+
+const LEADING_SLASH = /^\//
 
 export const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v))
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 export const fmt = (n: number) => Math.round(n).toLocaleString('ru-RU')
 
 /** Путь до файла в /public с учётом base для GitHub Pages. */
-export const asset = (p: string) => `${import.meta.env.BASE_URL}${p.replace(/^\//, '')}`
+export const asset = (p: string) => `${import.meta.env.BASE_URL}${p.replace(LEADING_SLASH, '')}`
 
 /** Уважаем системную настройку «меньше движения». */
 export function useReducedMotion() {
@@ -42,12 +44,16 @@ export function useInView<T extends HTMLElement>(
 
   useEffect(() => {
     const el = ref.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setSeen(true)
-          if (once) io.disconnect()
+          if (once) {
+            io.disconnect()
+          }
         } else if (!once) {
           setSeen(false)
         }
@@ -68,8 +74,12 @@ export function useMagnetic<T extends HTMLElement>(strength = 0.32, radius = 90)
 
   useEffect(() => {
     const el = ref.current
-    if (!el || reduced) return
-    if (window.matchMedia('(hover: none)').matches) return
+    if (!el || reduced) {
+      return
+    }
+    if (window.matchMedia('(hover: none)').matches) {
+      return
+    }
 
     let raf = 0
     let tx = 0
@@ -91,7 +101,9 @@ export function useMagnetic<T extends HTMLElement>(strength = 0.32, radius = 90)
     }
 
     const start = () => {
-      if (!raf) raf = requestAnimationFrame(tick)
+      if (!raf) {
+        raf = requestAnimationFrame(tick)
+      }
     }
 
     const onMove = (e: PointerEvent) => {
@@ -116,7 +128,9 @@ export function useMagnetic<T extends HTMLElement>(strength = 0.32, radius = 90)
     window.addEventListener('pointermove', onMove, { passive: true })
     return () => {
       window.removeEventListener('pointermove', onMove)
-      if (raf) cancelAnimationFrame(raf)
+      if (raf) {
+        cancelAnimationFrame(raf)
+      }
       el.style.transform = ''
     }
   }, [strength, radius, reduced])
@@ -131,8 +145,12 @@ export function useTilt<T extends HTMLElement>(max = 9) {
 
   useEffect(() => {
     const el = ref.current
-    if (!el || reduced) return
-    if (window.matchMedia('(hover: none)').matches) return
+    if (!el || reduced) {
+      return
+    }
+    if (window.matchMedia('(hover: none)').matches) {
+      return
+    }
 
     let raf = 0
     let trx = 0
@@ -152,7 +170,9 @@ export function useTilt<T extends HTMLElement>(max = 9) {
       }
     }
     const start = () => {
-      if (!raf) raf = requestAnimationFrame(tick)
+      if (!raf) {
+        raf = requestAnimationFrame(tick)
+      }
     }
 
     const onMove = (e: PointerEvent) => {
@@ -176,7 +196,9 @@ export function useTilt<T extends HTMLElement>(max = 9) {
     return () => {
       el.removeEventListener('pointermove', onMove)
       el.removeEventListener('pointerleave', onLeave)
-      if (raf) cancelAnimationFrame(raf)
+      if (raf) {
+        cancelAnimationFrame(raf)
+      }
     }
   }, [max, reduced])
 
@@ -189,15 +211,21 @@ export function useCountUp(target: number, active: boolean, duration = 1900) {
   const reduced = useReducedMotion()
 
   useEffect(() => {
-    if (!active || reduced) return
+    if (!active || reduced) {
+      return
+    }
     let raf = 0
     let t0 = 0
     const step = (t: number) => {
-      if (!t0) t0 = t
+      if (!t0) {
+        t0 = t
+      }
       const p = clamp((t - t0) / duration, 0, 1)
-      const eased = 1 - Math.pow(1 - p, 4)
+      const eased = 1 - (1 - p) ** 4
       setValue(target * eased)
-      if (p < 1) raf = requestAnimationFrame(step)
+      if (p < 1) {
+        raf = requestAnimationFrame(step)
+      }
     }
     raf = requestAnimationFrame(step)
     return () => cancelAnimationFrame(raf)
@@ -212,7 +240,9 @@ export function useScrollProgress() {
   useEffect(() => {
     let raf = 0
     const on = () => {
-      if (raf) return
+      if (raf) {
+        return
+      }
       raf = requestAnimationFrame(() => {
         const max = document.documentElement.scrollHeight - window.innerHeight
         setP(max > 0 ? clamp(window.scrollY / max, 0, 1) : 0)
@@ -225,7 +255,9 @@ export function useScrollProgress() {
     return () => {
       window.removeEventListener('scroll', on)
       window.removeEventListener('resize', on)
-      if (raf) cancelAnimationFrame(raf)
+      if (raf) {
+        cancelAnimationFrame(raf)
+      }
     }
   }, [])
   return p
@@ -236,17 +268,23 @@ export function useActiveSection(ids: string[]) {
   const [active, setActive] = useState(ids[0] ?? '')
   useEffect(() => {
     const els = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[]
-    if (!els.length) return
+    if (els.length === 0) {
+      return
+    }
     const io = new IntersectionObserver(
       (entries) => {
-        const visible = entries
+        const [visible] = entries
           .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
-        if (visible) setActive(visible.target.id)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+        if (visible) {
+          setActive(visible.target.id)
+        }
       },
       { rootMargin: '-42% 0px -50% 0px', threshold: [0, 0.2, 0.5, 1] },
     )
-    els.forEach((el) => io.observe(el))
+    for (const el of els) {
+      io.observe(el)
+    }
     return () => io.disconnect()
   }, [ids])
   return active
@@ -256,9 +294,14 @@ export function useActiveSection(ids: string[]) {
 export function useScrollTo() {
   return useCallback((id: string) => {
     const el = document.getElementById(id)
-    if (!el) return
+    if (!el) {
+      return
+    }
     const lenis = (window as unknown as { __lenis?: { scrollTo: (t: HTMLElement, o?: object) => void } }).__lenis
-    if (lenis) lenis.scrollTo(el, { offset: -70, duration: 1.35 })
-    else el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (lenis) {
+      lenis.scrollTo(el, { offset: -70, duration: 1.35 })
+    } else {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }, [])
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { TERRITORY, CONTACTS } from '../content'
-import { Reveal, Counter, Btn } from './ui/Primitives'
+import { CONTACTS, TERRITORY } from '../content'
 import { OsmMap } from './OsmMap'
+import { Btn, Counter, Reveal } from './ui/primitives'
 
 export function Territory() {
   const [hover, setHover] = useState<string | null>(null)
@@ -35,10 +35,14 @@ export function Territory() {
                 delay={i * 130}
                 className={`terr__card ${z.accent ? 'is-accent' : ''}`}
               >
+                {/* biome-ignore lint/a11y/noStaticElementInteractions: подсветка зоны на карте — визуальное дополнение, весь текст карточки доступен и без неё */}
+                {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: то же самое — своей функциональности у наведения нет */}
                 <div
+                  className="terr__card-in"
                   onMouseEnter={() => setHover(z.name)}
                   onMouseLeave={() => setHover(null)}
-                  className="terr__card-in"
+                  onFocus={() => setHover(z.name)}
+                  onBlur={() => setHover(null)}
                   data-cursor="hover"
                 >
                   <div className="terr__card-head">

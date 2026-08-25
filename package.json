@@ -1,8 +1,15 @@
 {
   "name": "tsarsky-gazon",
+  "description": "Лендинг сервиса ухода за газоном в Пушкине и Александровке",
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
+  "author": "kewldan",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kewldan/tsar-trava.git"
+  },
   "engines": {
     "node": "^20.19.0 || ^22.13.0 || >=24"
   },
@@ -11,11 +18,13 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "verify": "npm run typecheck && npm run lint && npm run format:check && vite build"
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "verify": "npm run typecheck && biome ci . && vite build",
+    "smoke": "node scripts/smoke.mjs",
+    "shots": "node scripts/shots.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "^9.7.0",
@@ -26,19 +35,13 @@
     "three": "^0.185.1"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@biomejs/biome": "^2.5.10",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "@types/three": "^0.185.4",
     "@vitejs/plugin-react": "^6.1.0",
-    "eslint": "^10.9.1",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.4",
-    "globals": "^17.11.0",
     "playwright": "^1.62.1",
-    "prettier": "^3.9.6",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.68.0",
+    "typescript": "^7.0.2",
     "vite": "^8.2.2"
   }
 }

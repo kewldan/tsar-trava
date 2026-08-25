@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
-import { PRICING, CONTACTS } from '../content'
-import { Reveal, Btn, Counter } from './ui/Primitives'
-import { fmt, useTilt, clamp } from '../lib/hooks'
+import { CONTACTS, PRICING } from '../content'
+import { clamp, fmt, useTilt } from '../lib/hooks'
+import { Btn, Counter, Reveal } from './ui/primitives'
 
 type Mode = 'once' | 'season'
 
@@ -14,8 +14,8 @@ function Plan({ p, mode, i }: { p: (typeof PRICING.plans)[number]; mode: Mode; i
     <Reveal mode="fade" delay={i * 130} className="plan-wrap">
       <article className={`plan ${p.accent ? 'is-accent' : ''}`} ref={ref} data-cursor="hover">
         <span className="plan__spot" aria-hidden="true" />
-        {p.accent && <span className="plan__aura" aria-hidden="true" />}
-        {'badge' in p && p.badge && <span className="plan__badge mono">{p.badge}</span>}
+        {p.accent ? <span className="plan__aura" aria-hidden="true" /> : null}
+        {'badge' in p && p.badge ? <span className="plan__badge mono">{p.badge}</span> : null}
 
         <header className="plan__head">
           <h3 className="plan__name">{p.name}</h3>
@@ -44,11 +44,27 @@ function Plan({ p, mode, i }: { p: (typeof PRICING.plans)[number]; mode: Mode; i
             <li key={f.t} className={f.on ? 'is-on' : 'is-off'}>
               <span className="plan__tick" aria-hidden="true">
                 {f.on ? (
-                  <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.7">
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 14 14"
+                    width="12"
+                    height="12"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                  >
                     <path d="M2.5 7.4 5.6 10.5 11.5 3.8" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 ) : (
-                  <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.4">
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 14 14"
+                    width="12"
+                    height="12"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                  >
                     <path d="M3.5 7h7" strokeLinecap="round" />
                   </svg>
                 )}
@@ -72,7 +88,7 @@ function Calculator({ mode }: { mode: Mode }) {
   const [extras, setExtras] = useState<string[]>(['edge'])
 
   const base = mode === 'season' ? PRICING.plans[1].priceSeason : PRICING.plans[1].priceOnce
-  const f = PRICING.calc.freq.find((x) => x.id === freq)!
+  const f = PRICING.calc.freq.find((x) => x.id === freq) ?? PRICING.calc.freq[0]
 
   const { perVisit, monthly, extrasSum } = useMemo(() => {
     const extrasPerSotka = PRICING.calc.extras
@@ -140,6 +156,7 @@ function Calculator({ mode }: { mode: Mode }) {
             <div className="calc__freq">
               {PRICING.calc.freq.map((x) => (
                 <button
+                  type="button"
                   key={x.id}
                   className={`calc__chip ${freq === x.id ? 'is-on' : ''}`}
                   onClick={() => setFreq(x.id)}
@@ -158,13 +175,22 @@ function Calculator({ mode }: { mode: Mode }) {
             <div className="calc__extras">
               {PRICING.calc.extras.map((e) => (
                 <button
+                  type="button"
                   key={e.id}
                   className={`calc__extra ${extras.includes(e.id) ? 'is-on' : ''}`}
                   onClick={() => toggle(e.id)}
                   data-cursor="hover"
                 >
                   <span className="calc__box" aria-hidden="true">
-                    <svg viewBox="0 0 14 14" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 14 14"
+                      width="11"
+                      height="11"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <path d="M2.5 7.4 5.6 10.5 11.5 3.8" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </span>
@@ -238,23 +264,30 @@ export function Pricing() {
           </Reveal>
 
           <Reveal mode="fade" delay={220}>
-            <div className="toggle" role="group" aria-label="Режим оплаты">
+            <fieldset className="toggle">
+              <legend className="sr-only">Режим оплаты</legend>
               <span
                 className="toggle__pill"
                 style={{ transform: `translateX(${mode === 'season' ? '100%' : '0'})` }}
                 aria-hidden="true"
               />
-              <button className={mode === 'once' ? 'is-on' : ''} onClick={() => setMode('once')} data-cursor="hover">
+              <button
+                type="button"
+                className={mode === 'once' ? 'is-on' : ''}
+                onClick={() => setMode('once')}
+                data-cursor="hover"
+              >
                 {PRICING.toggle.once}
               </button>
               <button
+                type="button"
                 className={mode === 'season' ? 'is-on' : ''}
                 onClick={() => setMode('season')}
                 data-cursor="hover"
               >
                 {PRICING.toggle.season}
               </button>
-            </div>
+            </fieldset>
           </Reveal>
         </div>
 

@@ -9,6 +9,7 @@
 
 [![CI](https://github.com/kewldan/tsar-trava/actions/workflows/ci.yml/badge.svg)](https://github.com/kewldan/tsar-trava/actions/workflows/ci.yml)
 [![Deploy](https://github.com/kewldan/tsar-trava/actions/workflows/deploy.yml/badge.svg)](https://github.com/kewldan/tsar-trava/actions/workflows/deploy.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-c8a96a.svg)](LICENSE)
 
 ### [→ Открыть сайт](https://kewldan.github.io/tsar-trava/)
 
@@ -91,11 +92,11 @@
 
 |          |                                                                  |
 | -------- | ---------------------------------------------------------------- |
-| Сборка   | Vite 8 (Rolldown), TypeScript 5.9                                |
+| Сборка   | Vite 8 (Rolldown), TypeScript 7                                  |
 | UI       | React 19                                                         |
 | 3D       | three.js 0.185 через `@react-three/fiber` 9, собственные шейдеры |
 | Анимация | GSAP 3.15 + ScrollTrigger, Lenis, CSS-переходы                   |
-| Качество | ESLint 10 (flat config), Prettier, дымовой прогон в Playwright   |
+| Качество | Biome 2.5 (`preset: all`), дымовой прогон в Playwright           |
 | Хостинг  | GitHub Pages через GitHub Actions                                |
 
 Библиотеки готовых компонентов не используются: `drei` не подключён, всё
@@ -103,10 +104,6 @@
 без препроцессоров и рантайм-стилей.
 
 Итоговый вес: **~415 КБ gzip**, из них 185 КБ — сам three.js.
-
-TypeScript намеренно закреплён на ветке 5.9, хотя вышла 7.0: `typescript-eslint`
-объявляет пиром `typescript <6.1.0`, и поддержки семёрки нет даже в канареечных
-сборках. Как появится — версия поднимется вместе с ней.
 
 ## Структура
 
@@ -138,30 +135,32 @@ docs/gemini-prompt.md     промпт для генерации портрет�
 
 ## Запуск
 
-Нужен Node 20.19+, 22.13+ или 24+ — планку задают Vite 8 и ESLint 10.
+Нужен Node 20.19+, 22.13+ или 24+ — планку задаёт Vite 8.
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
 ```
 
-| Команда             | Что делает                                  |
-| ------------------- | ------------------------------------------- |
-| `npm run dev`       | дев-сервер                                  |
-| `npm run build`     | проверка типов + сборка в `dist/`           |
-| `npm run preview`   | посмотреть собранное                        |
-| `npm run typecheck` | только `tsc --noEmit`                       |
-| `npm run lint`      | ESLint (`lint:fix` — с автоправками)        |
-| `npm run format`    | Prettier (`format:check` — только проверка) |
-| `npm run verify`    | всё вместе: типы → линтер → формат → сборка |
+| Команда             | Что делает                                            |
+| ------------------- | ----------------------------------------------------- |
+| `npm run dev`       | дев-сервер                                            |
+| `npm run build`     | проверка типов + сборка в `dist/`                     |
+| `npm run preview`   | посмотреть собранное                                  |
+| `npm run typecheck` | только `tsc --noEmit`                                 |
+| `npm run check`     | Biome: формат, линт, порядок импортов                 |
+| `npm run check:fix` | то же с автоправкой                                   |
+| `npm run verify`    | всё вместе: типы → `biome ci` → сборка                |
+| `npm run smoke`     | дымовой прогон собранной страницы в Chromium          |
+| `npm run shots`     | пересоздать скриншоты для этого README                |
 
 Дымовой прогон и скриншоты запускаются по готовому `dist/`:
 
 ```bash
 npx playwright install chromium   # один раз
 npx vite build
-node scripts/smoke.mjs            # поднимает страницу в Chromium и проверяет её
-node scripts/shots.mjs            # пересоздаёт docs/screenshots/
+npm run smoke                     # поднимает страницу в Chromium и проверяет её
+npm run shots                     # пересоздаёт docs/screenshots/
 ```
 
 ## Частые правки
@@ -229,8 +228,9 @@ Web Mercator, упрощена алгоритмом Дугласа–Пекер�
 
 **`ci.yml`** — на каждый push и pull request:
 
-- _Типы, линтер, формат_ — `tsc`, ESLint и Prettier запускаются независимо,
-  так что с одного прогона видно все проблемы сразу, а не первую попавшуюся.
+- _Типы и Biome_ — `tsc` и `biome ci` запускаются независимо, так что с одного
+  прогона видно все проблемы сразу, а не первую попавшуюся. Biome развешивает
+  аннотации прямо в диффе пул-реквеста.
 - _Сборка_ — собирает `dist`, печатает таблицу размеров в сводку прогона и
   падает, если суммарный gzip превысил 520 КБ. Это страховка от случайного
   тяжёлого импорта.
@@ -241,10 +241,22 @@ Web Mercator, упрощена алгоритмом Дугласа–Пекер�
 
 **`deploy.yml`** — на push в `main` собирает и публикует на GitHub Pages.
 
-Правила ESLint для `src/three/**` ослаблены осознанно: three.js императивен по
-своей природе — кадр рисуется мутацией объектов сцены, — и компиляторные
-проверки `react-hooks` считают это нарушением чистоты. Отключены ровно четыре
-правила и только для слоя 3D, в остальном коде они работают.
+### Линтер
+
+Проверки — Biome с `preset: "all"`, то есть включено всё, что он умеет.
+Исключения выставлены точечно и каждое снабжено причиной прямо в `biome.jsonc`:
+правила для чужих фреймворков (Solid, Qwik, Next.js), `noMagicNumbers` — в коде,
+наполовину состоящем из коэффициентов шейдеров и координат `viewBox`, и
+`noUnnecessaryConditions`, у которого пока неполный вывод типов: на одинаковых
+`const el = ref.current; if (!el) return` он выдаёт то «условие всегда истинно»,
+то «всегда ложно». Убрать эти проверки — уронить страницу.
+
+Для `src/three/**` дополнительно снят `noUnknownAttribute`: react-three-fiber
+расширяет JSX элементами three.js, и `<mesh>` с `<shaderMaterial>` Biome
+проверять не умеет.
+
+Единичные послабления стоят строкой `biome-ignore` у места с объяснением,
+почему там иначе нельзя, — общего списка «чтобы замолчало» в конфиге нет.
 
 ## Деплой
 
@@ -255,6 +267,15 @@ push в `main` пересобирает и выкатывает сайт.
 от него зависит `base` для путей к ассетам (и `PREFIX` в двух скриптах в
 `scripts/`). Свой домен — положите `public/CNAME` с доменом и пропишите
 CNAME-запись у регистратора.
+
+## Лицензия
+
+Код — [MIT](LICENSE).
+
+Под лицензию на код не подпадают: `src/data/pushkin-map.json` (производная от
+данных OpenStreetMap, ODbL — атрибуция обязательна), портреты в `public/team/`
+(права у изображённых людей), подключаемые шрифты (SIL OFL 1.1) и тексты
+с фирменным оформлением сервиса. Подробности — в файле [LICENSE](LICENSE).
 
 ---
 

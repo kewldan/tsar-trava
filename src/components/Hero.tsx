@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { HERO, BRAND, CONTACTS, TICKER } from '../content'
-import { SplitText, Btn, Marquee } from './ui/Primitives'
+import { BRAND, CONTACTS, HERO, TICKER } from '../content'
 import { useScrollTo } from '../lib/hooks'
+import { Btn, Marquee, SplitText } from './ui/primitives'
 
 export function Hero({ ready }: { ready: boolean }) {
   const [t, setT] = useState(0)
@@ -12,7 +12,9 @@ export function Hero({ ready }: { ready: boolean }) {
   useEffect(() => {
     let raf = 0
     const on = () => {
-      if (raf) return
+      if (raf) {
+        return
+      }
       raf = requestAnimationFrame(() => {
         const h = window.innerHeight
         setT(Math.min(1, window.scrollY / (h * 0.9)))
@@ -23,7 +25,9 @@ export function Hero({ ready }: { ready: boolean }) {
     window.addEventListener('scroll', on, { passive: true })
     return () => {
       window.removeEventListener('scroll', on)
-      if (raf) cancelAnimationFrame(raf)
+      if (raf) {
+        cancelAnimationFrame(raf)
+      }
     }
   }, [])
 
@@ -81,6 +85,7 @@ export function Hero({ ready }: { ready: boolean }) {
       </div>
 
       <button
+        type="button"
         className="hero__scroll"
         onClick={() => scrollTo('manifest')}
         style={{ opacity: 1 - t * 2.4 }}

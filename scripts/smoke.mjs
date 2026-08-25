@@ -13,10 +13,10 @@
  * Ожидает готовый dist рядом. Локально: npx vite build && node scripts/smoke.mjs
  */
 
-import { chromium } from 'playwright'
-import http from 'node:http'
 import fs from 'node:fs'
+import http from 'node:http'
 import path from 'node:path'
+import { chromium } from 'playwright'
 
 const DIST = path.resolve(process.argv[2] ?? 'dist')
 const PORT = 4275
@@ -49,8 +49,12 @@ if (!fs.existsSync(path.join(DIST, 'index.html'))) {
 
 const server = http.createServer((req, res) => {
   let p = decodeURIComponent((req.url ?? '/').split('?')[0])
-  if (p.startsWith(PREFIX)) p = p.slice(PREFIX.length)
-  if (p === '' || p === '/') p = '/index.html'
+  if (p.startsWith(PREFIX)) {
+    p = p.slice(PREFIX.length)
+  }
+  if (p === '' || p === '/') {
+    p = '/index.html'
+  }
   const file = path.join(DIST, p)
   if (!file.startsWith(DIST)) {
     res.writeHead(403).end('forbidden')
@@ -72,7 +76,9 @@ const URL_ = `http://localhost:${PORT}${PREFIX}/`
 const failures = []
 const check = (ok, label, detail = '') => {
   console.log(`${ok ? '  ok  ' : ' FAIL '} ${label}${detail ? ` — ${detail}` : ''}`)
-  if (!ok) failures.push(`${label}${detail ? `: ${detail}` : ''}`)
+  if (!ok) {
+    failures.push(`${label}${detail ? `: ${detail}` : ''}`)
+  }
 }
 
 const browser = await chromium.launch({
@@ -96,17 +102,23 @@ try {
       isMobile: vp.width < 800,
       hasTouch: vp.width < 800,
     })
-    if (!firstPage) firstPage = page
+    if (!firstPage) {
+      firstPage = page
+    }
 
     const problems = []
     page.on('console', (m) => {
-      if (m.type() === 'error') problems.push(`console: ${m.text()}`)
+      if (m.type() === 'error') {
+        problems.push(`console: ${m.text()}`)
+      }
     })
     page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`))
     page.on('requestfailed', (r) => {
       // Шрифты тянутся с внешнего хоста: в закрытом окружении их может не быть,
       // на вёрстку это не влияет
-      if (r.url().includes('fonts.g')) return
+      if (r.url().includes('fonts.g')) {
+        return
+      }
       problems.push(`request: ${r.url()} — ${r.failure()?.errorText}`)
     })
 
@@ -134,7 +146,9 @@ try {
     const overflow = await page.evaluate(() => {
       const de = document.documentElement
       const over = de.scrollWidth - de.clientWidth
-      if (over <= 1) return { over, culprits: [] }
+      if (over <= 1) {
+        return { over, culprits: [] }
+      }
       const culprits = []
       for (const el of document.querySelectorAll('*')) {
         const r = el.getBoundingClientRect()
@@ -158,20 +172,27 @@ try {
 
     check(problems.length === 0, 'консоль чистая', problems.slice(0, 4).join(' | '))
 
-    if (page !== firstPage) await page.close()
+    if (page !== firstPage) {
+      await page.close()
+    }
   }
 } finally {
-  if (failures.length && firstPage) {
-    await firstPage.screenshot({ path: 'smoke-failure.png', fullPage: false }).catch(() => {})
+  if (failures.length > 0 && firstPage) {
+    await firstPage.screenshot({ path: 'smoke-failure.png', fullPage: false }).catch(() => {
+      // Снимок — приятный бонус к отчёту, его отсутствие не должно
+      // подменять настоящую причину падения
+    })
   }
   await browser.close()
   server.close()
 }
 
 console.log('')
-if (failures.length) {
+if (failures.length > 0) {
   console.error(`Проваленных проверок: ${failures.length}`)
-  for (const f of failures) console.error(`  · ${f}`)
+  for (const f of failures) {
+    console.error(`  · ${f}`)
+  }
   process.exit(1)
 }
 console.log('Все проверки пройдены.')

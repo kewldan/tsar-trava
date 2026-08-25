@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState, useEffect, Suspense } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { GRASS_VERT, GRASS_FRAG, GROUND_VERT, GROUND_FRAG, POLLEN_VERT, POLLEN_FRAG } from './grassShaders'
 import { lerp, useReducedMotion } from '../lib/hooks'
+import { GRASS_FRAG, GRASS_VERT, GROUND_FRAG, GROUND_VERT, POLLEN_FRAG, POLLEN_VERT } from './grassShaders'
 
 const C = {
   root: new THREE.Color('#06180e'),
@@ -14,6 +14,13 @@ const C = {
   groundLit: new THREE.Color('#0d2618'),
   pollen: new THREE.Color('#d8c48c'),
 }
+
+/** Профили нагрузки по классу устройства: чем слабее, тем меньше инстансов. */
+const QUALITY = {
+  low: { bladeCount: 14_000, pollenCount: 140, dpr: [1, 1.35] as [number, number] },
+  mid: { bladeCount: 42_000, pollenCount: 380, dpr: [1, 1.9] as [number, number] },
+  high: { bladeCount: 72_000, pollenCount: 620, dpr: [1, 1.9] as [number, number] },
+} as const
 
 const STRIPE_ANGLE = Math.PI * 0.28 // диагональ покоса
 const STRIPE_FREQ = 2.7
@@ -47,7 +54,7 @@ function GrassField({ count, scrollRef }: { count: number; scrollRef: React.RefO
     for (let i = 0; i < count; i++) {
       // Плотнее у камеры, реже к горизонту: экономит инстансы там,
       // где их всё равно съедает туман.
-      const r = Math.pow(Math.random(), 0.55) * FIELD_R
+      const r = Math.random() ** 0.55 * FIELD_R
       const a = Math.random() * Math.PI * 2
       const x = Math.cos(a) * r
       const z = Math.sin(a) * r
@@ -104,7 +111,9 @@ function GrassField({ count, scrollRef }: { count: number; scrollRef: React.RefO
 
   useFrame((state, delta) => {
     const u = matRef.current?.uniforms
-    if (!u) return
+    if (!u) {
+      return
+    }
 
     const d = Math.min(delta, 0.05)
     u.uTime.value += reduced ? d * 0.25 : d
@@ -135,8 +144,8 @@ function GrassField({ count, scrollRef }: { count: number; scrollRef: React.RefO
         fragmentShader={GRASS_FRAG}
         uniforms={uniforms}
         side={THREE.DoubleSide}
-        transparent
-        depthWrite
+        transparent={true}
+        depthWrite={true}
       />
     </mesh>
   )
@@ -164,9 +173,13 @@ function Ground() {
 
   useFrame((state) => {
     const u = matRef.current?.uniforms
-    if (!u) return
+    if (!u) {
+      return
+    }
     ray.setFromCamera(state.pointer as THREE.Vector2, state.camera)
-    if (ray.ray.intersectPlane(plane, hit)) smooth.current.lerp(hit, 0.1)
+    if (ray.ray.intersectPlane(plane, hit)) {
+      smooth.current.lerp(hit, 0.1)
+    }
     u.uMouse.value.copy(smooth.current)
   })
 
@@ -190,7 +203,7 @@ function Pollen({ count }: { count: number }) {
     const seed = new Float32Array(count)
     const size = new Float32Array(count)
     for (let i = 0; i < count; i++) {
-      const r = Math.pow(Math.random(), 0.7) * 7
+      const r = Math.random() ** 0.7 * 7
       const a = Math.random() * Math.PI * 2
       pos[i * 3] = Math.cos(a) * r
       pos[i * 3 + 1] = 0.15 + Math.random() * 2.2
@@ -215,7 +228,9 @@ function Pollen({ count }: { count: number }) {
   )
 
   useFrame((_, delta) => {
-    if (matRef.current) matRef.current.uniforms.uTime.value += Math.min(delta, 0.05)
+    if (matRef.current) {
+      matRef.current.uniforms.uTime.value += Math.min(delta, 0.05)
+    }
   })
 
   return (
@@ -225,7 +240,7 @@ function Pollen({ count }: { count: number }) {
         vertexShader={POLLEN_VERT}
         fragmentShader={POLLEN_FRAG}
         uniforms={uniforms}
-        transparent
+        transparent={true}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
       />
@@ -267,7 +282,9 @@ function ReadyProbe({ onReady }: { onReady?: () => void }) {
   const frames = useRef(0)
   const fired = useRef(false)
   useFrame(() => {
-    if (fired.current) return
+    if (fired.current) {
+      return
+    }
     if (++frames.current >= 3) {
       fired.current = true
       onReady?.()
@@ -294,14 +311,16 @@ export function GrassScene({
     const w = window.innerWidth
     const cores = navigator.hardwareConcurrency ?? 4
     const coarse = window.matchMedia('(pointer: coarse)').matches
-    if (w < 720 || coarse || cores <= 4) setTier('low')
-    else if (w < 1400 || cores <= 8) setTier('mid')
-    else setTier('high')
+    if (w < 720 || coarse || cores <= 4) {
+      setTier('low')
+    } else if (w < 1400 || cores <= 8) {
+      setTier('mid')
+    } else {
+      setTier('high')
+    }
   }, [])
 
-  const bladeCount = tier === 'low' ? 14000 : tier === 'mid' ? 42000 : 72000
-  const pollenCount = tier === 'low' ? 140 : tier === 'mid' ? 380 : 620
-  const dpr: [number, number] = tier === 'low' ? [1, 1.35] : [1, 1.9]
+  const { bladeCount, pollenCount, dpr } = QUALITY[tier]
 
   return (
     <Canvas

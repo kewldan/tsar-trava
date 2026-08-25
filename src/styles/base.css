@@ -27,9 +27,9 @@
   --line-strong: rgba(242, 240, 234, 0.2);
   --line-brass: rgba(200, 169, 106, 0.32);
 
-  --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
-  --font-sans: 'Manrope', -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+  --font-display: "Cormorant Garamond", "Times New Roman", serif;
+  --font-sans: "Manrope", -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
 
   --shell: min(1560px, 100% - 9vw);
   --gutter: clamp(20px, 4.5vw, 80px);
@@ -48,8 +48,8 @@
   /* Cormorant по умолчанию отдаёт минускульные цифры — «1» выглядит как «I».
      Для цен, счётчиков и заголовков нужны маюскульные. */
   font-feature-settings:
-    'lnum' 1,
-    'kern' 1;
+    "lnum" 1,
+    "kern" 1;
   font-variant-numeric: lining-nums;
 }
 
@@ -292,7 +292,7 @@ select {
 /* ── Утилиты ──────────────────────────────────────────── */
 
 .noise::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;

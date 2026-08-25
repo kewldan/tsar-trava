@@ -1,31 +1,36 @@
-import { Suspense, lazy, useEffect, useRef, useState, useCallback } from 'react'
-import Lenis from 'lenis'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-import { Preloader } from './components/Preloader'
+import Lenis from 'lenis'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { BeforeAfter } from './components/BeforeAfter'
+import { Cta } from './components/Cta'
 import { Cursor } from './components/Cursor'
-import { Nav } from './components/Nav'
+import { Equipment } from './components/Equipment'
+import { Faq } from './components/Faq'
+import { Footer } from './components/Footer'
 import { Hero } from './components/Hero'
 import { Manifesto } from './components/Manifesto'
-import { Services } from './components/Services'
-import { Territory } from './components/Territory'
-import { Process } from './components/Process'
-import { Equipment } from './components/Equipment'
-import { BeforeAfter } from './components/BeforeAfter'
-import { Team } from './components/Team'
+import { Nav } from './components/Nav'
+import { Preloader } from './components/Preloader'
 import { Pricing } from './components/Pricing'
+import { Process } from './components/Process'
+import { Services } from './components/Services'
+import { Team } from './components/Team'
+import { Territory } from './components/Territory'
 import { Testimonials } from './components/Testimonials'
-import { Faq } from './components/Faq'
-import { Cta } from './components/Cta'
-import { Footer } from './components/Footer'
 import { useReducedMotion } from './lib/hooks'
 
 const GrassScene = lazy(() => import('./three/GrassScene').then((m) => ({ default: m.GrassScene })))
 
 gsap.registerPlugin(ScrollTrigger)
 
-export default function App() {
+/**
+ * Экземпляр Lenis кладётся на window, чтобы до него могли дотянуться
+ * обработчики переходов к секциям, не протаскивая его через пропсы.
+ */
+const lenisHost = () => window as unknown as { __lenis?: Lenis }
+
+export function App() {
   const [ready, setReady] = useState(false)
   const [sceneReady, setSceneReady] = useState(false)
   // Сцена видна только на первом экране — ниже держать её живой незачем
@@ -36,17 +41,19 @@ export default function App() {
 
   /* Плавный скролл + связка с ScrollTrigger */
   useEffect(() => {
-    if (reduced) return
+    if (reduced) {
+      return
+    }
 
     const lenis = new Lenis({
       duration: 1.15,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      easing: (t) => Math.min(1, 1.001 - 2 ** (-10 * t)),
       wheelMultiplier: 0.95,
       touchMultiplier: 1.6,
       lerp: 0.09,
     })
-    ;(window as unknown as { __lenis?: Lenis }).__lenis = lenis
 
+    lenisHost().__lenis = lenis
     lenis.on('scroll', ScrollTrigger.update)
 
     const raf = (time: number) => lenis.raf(time * 1000)
@@ -56,7 +63,7 @@ export default function App() {
     return () => {
       gsap.ticker.remove(raf)
       lenis.destroy()
-      delete (window as unknown as { __lenis?: Lenis }).__lenis
+      lenisHost().__lenis = undefined
     }
   }, [reduced])
 
@@ -64,7 +71,9 @@ export default function App() {
   useEffect(() => {
     let raf = 0
     const on = () => {
-      if (raf) return
+      if (raf) {
+        return
+      }
       raf = requestAnimationFrame(() => {
         const vh = Math.max(1, window.innerHeight)
         heroProgress.current = Math.min(1, window.scrollY / vh)
@@ -76,7 +85,9 @@ export default function App() {
     window.addEventListener('scroll', on, { passive: true })
     return () => {
       window.removeEventListener('scroll', on)
-      if (raf) cancelAnimationFrame(raf)
+      if (raf) {
+        cancelAnimationFrame(raf)
+      }
     }
   }, [])
 
@@ -84,7 +95,9 @@ export default function App() {
   const onSceneReady = useCallback(() => setSceneReady(true), [])
 
   useEffect(() => {
-    if (!ready) return
+    if (!ready) {
+      return
+    }
     const t = setTimeout(() => ScrollTrigger.refresh(), 400)
     return () => clearTimeout(t)
   }, [ready])

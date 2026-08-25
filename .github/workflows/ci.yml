@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   quality:
-    name: Типы, линтер, формат
+    name: Типы и Biome
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -32,13 +32,11 @@ jobs:
         if: '!cancelled()'
         run: npm run typecheck
 
-      - name: ESLint
+      # biome ci за один проход проверяет форматирование, линт и порядок
+      # импортов; --reporter=github развешивает аннотации прямо в диффе
+      - name: Biome
         if: '!cancelled()'
-        run: npm run lint
-
-      - name: Prettier
-        if: '!cancelled()'
-        run: npm run format:check
+        run: npx biome ci . --reporter=github
 
   build:
     name: Сборка

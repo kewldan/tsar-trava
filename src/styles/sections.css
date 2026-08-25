@@ -40,7 +40,7 @@
   box-shadow: 0 -80px 120px -40px var(--ink);
 }
 .page__body::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -160px;
   left: 0;
@@ -1261,7 +1261,7 @@
 }
 .equip__cross::before,
 .equip__cross::after {
-  content: '';
+  content: "";
   position: absolute;
   background: var(--brass);
 }
@@ -1700,6 +1700,9 @@
 .member__toggle {
   position: relative;
   display: grid;
+  padding: 0;
+  background: none;
+  cursor: pointer;
   place-items: center;
   width: 34px;
   height: 34px;
@@ -1710,8 +1713,13 @@
     border-color 0.4s ease,
     transform 0.5s var(--ease-spring);
 }
-.member:hover .member__toggle {
+.member:hover .member__toggle,
+.member__toggle:focus-visible {
   border-color: var(--line-brass);
+}
+.member__toggle:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 3px;
 }
 .member__toggle i {
   position: absolute;
@@ -2099,7 +2107,7 @@
   background: linear-gradient(90deg, var(--emerald), var(--brass));
 }
 .calc__slider-fill::after {
-  content: '';
+  content: "";
   position: absolute;
   right: 0;
   top: 50%;
@@ -2660,14 +2668,14 @@
     opacity 0.5s ease,
     filter 0.5s ease;
 }
-.form.is-sent .form__rows,
-.form.is-sent .form__foot {
+.form__foot {
   opacity: 0.28;
   filter: blur(2px);
   pointer-events: none;
 }
 
-.field {
+.form.is-sent .form__rows,
+.form.is-sent .field {
   position: relative;
   display: flex;
   flex-direction: column;

@@ -8,10 +8,10 @@
  * в docs/screenshots/ как JPEG, чтобы репозиторий не пух.
  */
 
-import { chromium } from 'playwright'
-import http from 'node:http'
 import fs from 'node:fs'
+import http from 'node:http'
 import path from 'node:path'
+import { chromium } from 'playwright'
 
 const DIST = path.resolve('dist')
 const OUT = path.resolve('docs/screenshots')
@@ -57,8 +57,12 @@ fs.mkdirSync(OUT, { recursive: true })
 
 const server = http.createServer((req, res) => {
   let p = decodeURIComponent((req.url ?? '/').split('?')[0])
-  if (p.startsWith(PREFIX)) p = p.slice(PREFIX.length)
-  if (p === '' || p === '/') p = '/index.html'
+  if (p.startsWith(PREFIX)) {
+    p = p.slice(PREFIX.length)
+  }
+  if (p === '' || p === '/') {
+    p = '/index.html'
+  }
   const file = path.join(DIST, p)
   fs.readFile(file, (err, buf) => {
     if (err) {
@@ -76,6 +80,22 @@ const browser = await chromium.launch({
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 })
 
+/** Ставит страницу в кадр, описанный якорем секции и сдвигом в экранах. */
+async function scrollToShot(page, shot) {
+  await page.evaluate((s) => {
+    const el = s.id ? document.getElementById(s.id) : null
+    const anchor = el ? el.getBoundingClientRect().top + window.scrollY - 24 : (s.top ?? 0)
+    const y = anchor + window.innerHeight * (s.extra ?? 0)
+
+    const lenis = window.__lenis
+    if (lenis) {
+      lenis.scrollTo(y, { immediate: true })
+    } else {
+      window.scrollTo(0, y)
+    }
+  }, shot)
+}
+
 async function shoot(list, { width, height, quality }) {
   const page = await browser.newPage({
     viewport: { width, height },
@@ -87,19 +107,7 @@ async function shoot(list, { width, height, quality }) {
   await page.waitForTimeout(5500)
 
   for (const shot of list) {
-    await page.evaluate((s) => {
-      let y
-      if (s.id) {
-        const el = document.getElementById(s.id)
-        y = el ? el.getBoundingClientRect().top + window.scrollY - 24 : 0
-        if (s.extra) y += window.innerHeight * s.extra
-      } else {
-        y = s.top ?? 0
-      }
-      const lenis = window.__lenis
-      if (lenis) lenis.scrollTo(y, { immediate: true })
-      else window.scrollTo(0, y)
-    }, shot)
+    await scrollToShot(page, shot)
 
     // Ждём, пока доиграют reveal-анимации секции
     await page.waitForTimeout(1900)

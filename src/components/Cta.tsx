@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { CTA, CONTACTS, PRICING, TERRITORY } from '../content'
-import { Reveal, Btn } from './ui/Primitives'
+import { CONTACTS, CTA, PRICING, TERRITORY } from '../content'
+import { Btn, Reveal } from './ui/primitives'
 
 type Status = 'idle' | 'sending' | 'sent' | 'error'
 
@@ -38,7 +38,9 @@ export function Cta() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setTouched(true)
-    if (!valid) return
+    if (!valid) {
+      return
+    }
 
     setStatus('sending')
     const text = compose()
@@ -93,6 +95,7 @@ export function Cta() {
                 <Reveal key={b} as="li" mode="fade" delay={200 + i * 100}>
                   <span className="cta__check" aria-hidden="true">
                     <svg
+                      aria-hidden="true"
                       viewBox="0 0 14 14"
                       width="12"
                       height="12"
@@ -120,7 +123,7 @@ export function Cta() {
           </div>
 
           <Reveal mode="fade" delay={160} className="cta__right">
-            <form className={`form ${status === 'sent' ? 'is-sent' : ''}`} onSubmit={submit} noValidate>
+            <form className={`form ${status === 'sent' ? 'is-sent' : ''}`} onSubmit={submit} noValidate={true}>
               <div className="form__rows">
                 <label className={`field ${touched && form.name.trim().length < 2 ? 'is-bad' : ''}`}>
                   <span className="field__label mono">Как к вам обращаться</span>

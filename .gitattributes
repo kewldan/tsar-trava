@@ -1,0 +1,9 @@
+# Единые переводы строк во всём репозитории: Biome форматирует под LF,
+# и без этого рабочая копия на Windows расходится с CI на Linux.
+* text=auto eol=lf
+
+# Бинарные ассеты git трогать не должен
+*.jpg binary
+*.png binary
+*.webp binary
+*.woff2 binary

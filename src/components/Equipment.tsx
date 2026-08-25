@@ -1,19 +1,20 @@
-import { Suspense, lazy, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef } from 'react'
 import { EQUIPMENT } from '../content'
-import { Reveal } from './ui/Primitives'
-import { useInView, useReducedMotion, clamp } from '../lib/hooks'
+import { clamp, useInView, useReducedMotion } from '../lib/hooks'
+import { Reveal } from './ui/primitives'
 
 const Scissors = lazy(() => import('../three/Scissors').then((m) => ({ default: m.Scissors })))
 
 export function Equipment() {
   const [ref, seen] = useInView<HTMLDivElement>({ threshold: 0.15, once: false })
-  const [hot, setHot] = useState<number | null>(null)
   const speed = useRef(0.55)
   const reduced = useReducedMotion()
 
   // Барабан раскручивается от скорости прокрутки — как настоящий, от протяжки
   useEffect(() => {
-    if (reduced) return
+    if (reduced) {
+      return
+    }
     let last = window.scrollY
     let lastT = performance.now()
     let raf = 0
@@ -89,13 +90,8 @@ export function Equipment() {
 
         <div className="equip__list">
           {EQUIPMENT.items.map((it, i) => (
-            <Reveal key={it.name} mode="fade" delay={i * 60} className={`equip__row ${hot === i ? 'is-hot' : ''}`}>
-              <div
-                className="equip__row-in"
-                onMouseEnter={() => setHot(i)}
-                onMouseLeave={() => setHot(null)}
-                data-cursor="hover"
-              >
+            <Reveal key={it.name} mode="fade" delay={i * 60} className="equip__row">
+              <div className="equip__row-in" data-cursor="hover">
                 <span className="equip__row-num mono">{String(i + 1).padStart(2, '0')}</span>
                 <span className="equip__row-name">{it.name}</span>
                 <span className="equip__row-spec mono dim">{it.spec}</span>

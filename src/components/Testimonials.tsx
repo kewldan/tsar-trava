@@ -1,11 +1,12 @@
 import { TESTIMONIALS, TICKER } from '../content'
-import { Reveal, Marquee } from './ui/Primitives'
+import { Marquee, Reveal } from './ui/primitives'
 
 function Row({ items, reverse }: { items: typeof TESTIMONIALS; reverse?: boolean }) {
   return (
     <div className={`tst__row ${reverse ? 'tst__row--rev' : ''}`}>
       <div className="tst__track">
         {[...items, ...items].map((t, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: лента намеренно дублирует один и тот же список — различить копии можно только позицией
           <blockquote className="tst" key={i} data-cursor="hover">
             <span className="tst__mark" aria-hidden="true">
               “
@@ -46,11 +47,11 @@ export function Testimonials() {
 
       <div className="tst__rows">
         <Row items={rowA} />
-        <Row items={rowB} reverse />
+        <Row items={rowB} reverse={true} />
       </div>
 
       <div className="tst__ticker">
-        <Marquee items={TICKER} speed={68} reverse separator="·" />
+        <Marquee items={TICKER} speed={68} reverse={true} separator="·" />
       </div>
     </section>
   )

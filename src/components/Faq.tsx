@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { FAQ, CONTACTS } from '../content'
-import { Reveal, Btn } from './ui/Primitives'
+import { CONTACTS, FAQ } from '../content'
+import { Btn, Reveal } from './ui/primitives'
 
 function Item({ q, a, i, open, onToggle }: { q: string; a: string; i: number; open: boolean; onToggle: () => void }) {
   return (
     <Reveal mode="fade" delay={i * 55} className="faq__item-wrap">
       <div className={`faq__item ${open ? 'is-open' : ''}`}>
-        <button className="faq__q" onClick={onToggle} aria-expanded={open} data-cursor="hover">
+        <button type="button" className="faq__q" onClick={onToggle} aria-expanded={open} data-cursor="hover">
           <span className="faq__num mono">{String(i + 1).padStart(2, '0')}</span>
           <span className="faq__q-text">{q}</span>
           <span className="faq__sign" aria-hidden="true">

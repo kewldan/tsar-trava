@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { lerp } from '../lib/hooks'
 
@@ -72,7 +72,9 @@ function Half({
 
   useFrame(() => {
     const g = group.current
-    if (!g) return
+    if (!g) {
+      return
+    }
     g.rotation.z = (angleRef.current ?? 0) * side
   })
 
@@ -93,7 +95,10 @@ function StudioEnv() {
     const c = document.createElement('canvas')
     c.width = 512
     c.height = 256
-    const ctx = c.getContext('2d')!
+    const ctx = c.getContext('2d')
+    if (!ctx) {
+      return
+    }
 
     const g = ctx.createLinearGradient(0, 0, 0, 256)
     g.addColorStop(0, '#3c3527')
@@ -166,7 +171,9 @@ function ScissorsModel({ speedRef }: { speedRef: React.RefObject<number> }) {
 
   useFrame((state, delta) => {
     const g = root.current
-    if (!g) return
+    if (!g) {
+      return
+    }
     const d = Math.min(delta, 0.05)
 
     // Скорость «щелчка» подхватывается от скорости прокрутки

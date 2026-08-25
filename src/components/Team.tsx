@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { TEAM, CONTACTS } from '../content'
-import { Reveal, Btn } from './ui/Primitives'
+import { CONTACTS, TEAM } from '../content'
 import { asset, useTilt } from '../lib/hooks'
+import { Btn, Reveal } from './ui/primitives'
 
 function Member({ m, i }: { m: (typeof TEAM)[number]; i: number }) {
   const ref = useTilt<HTMLElement>(6)
@@ -9,13 +9,7 @@ function Member({ m, i }: { m: (typeof TEAM)[number]; i: number }) {
 
   return (
     <Reveal mode="fade" delay={i * 140} className="team__cell">
-      <article
-        className={`member ${open ? 'is-open' : ''}`}
-        ref={ref}
-        onClick={() => setOpen((v) => !v)}
-        data-cursor="hover"
-        data-cursor-label={open ? 'свернуть' : 'подробнее'}
-      >
+      <article className={`member ${open ? 'is-open' : ''}`} ref={ref}>
         <div className="member__frame">
           <img
             className="member__photo"
@@ -58,10 +52,18 @@ function Member({ m, i }: { m: (typeof TEAM)[number]; i: number }) {
             <h3 className="member__name h-3">{m.name}</h3>
             <span className="member__role mono brass">{m.role}</span>
           </div>
-          <span className="member__toggle" aria-hidden="true">
-            <i />
-            <i />
-          </span>
+          <button
+            type="button"
+            className="member__toggle"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-label={`${open ? 'Свернуть' : 'Показать'} подробности: ${m.name}`}
+            data-cursor="hover"
+            data-cursor-label={open ? 'свернуть' : 'подробнее'}
+          >
+            <i aria-hidden="true" />
+            <i aria-hidden="true" />
+          </button>
         </footer>
       </article>
     </Reveal>

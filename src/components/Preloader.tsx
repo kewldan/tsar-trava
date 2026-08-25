@@ -9,6 +9,19 @@ const LINES = ['ЗАТАЧИВАЕМ НОЖИ', 'НАТЯГИВАЕМ ШНУР',
  * Поэтому под ним успевают скомпилироваться шейдеры и собраться
  * 40–70 тысяч инстансов травы, и страница открывается без рывка.
  */
+/**
+ * Целевой прогресс складывается из реальных вех, а не из таймера.
+ * Ползучая добавка нужна, чтобы полоса не замирала намертво, пока
+ * компилируются шейдеры.
+ */
+function progressTarget(elapsed: number, fontsDone: boolean, sceneReady: boolean, fontsWeight: number) {
+  if (sceneReady) {
+    return 100
+  }
+  const creeping = 8 + Math.min(20, elapsed / 60)
+  return fontsDone ? Math.max(creeping, 30 + fontsWeight * 100) : creeping
+}
+
 export function Preloader({
   fontsWeight = 0.2,
   sceneReady,
@@ -46,14 +59,10 @@ export function Preloader({
     let v = 0
 
     const step = (t: number) => {
-      if (!startedAt.current) startedAt.current = t
-      const elapsed = t - startedAt.current
-
-      // Целевой прогресс складывается из реальных вех, а не из таймера.
-      // Ползучая добавка нужна, чтобы полоса не замирала намертво.
-      let target = 8 + Math.min(20, elapsed / 60)
-      if (fontsDone.current) target = Math.max(target, 30 + fontsWeight * 100)
-      if (sceneReady) target = 100
+      if (!startedAt.current) {
+        startedAt.current = t
+      }
+      const target = progressTarget(t - startedAt.current, fontsDone.current, sceneReady, fontsWeight)
 
       v += (target - v) * (sceneReady ? 0.16 : 0.06)
       setPct(v)
@@ -77,7 +86,9 @@ export function Preloader({
   }, [])
 
   useEffect(() => {
-    if (!done) return
+    if (!done) {
+      return
+    }
     const a = setTimeout(onDone, 240)
     const b = setTimeout(() => setGone(true), 1700)
     return () => {
@@ -96,6 +107,7 @@ export function Preloader({
     >
       <div className="preloader__blades" aria-hidden="true">
         {Array.from({ length: 12 }).map((_, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: двенадцать декоративных створок фиксированной длины, данных у них нет
           <div key={i} className="preloader__blade" style={{ transitionDelay: `${i * 42}ms` }} />
         ))}
       </div>

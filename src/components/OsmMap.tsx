@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import mapData from '../data/pushkin-map.json'
+import mapData from '../data/pushkin-map.json' with { type: 'json' }
 import { useInView, useMediaQuery } from '../lib/hooks'
 
 /**
@@ -24,8 +24,10 @@ const DATA = mapData as unknown as {
 /** Плоский [x,y,x,y…] → строка path. */
 function toPath(flat: number[], close = false) {
   let d = `M${flat[0]} ${flat[1]}`
-  for (let i = 2; i < flat.length; i += 2) d += `L${flat[i]} ${flat[i + 1]}`
-  return close ? d + 'Z' : d
+  for (let i = 2; i < flat.length; i += 2) {
+    d += `L${flat[i]} ${flat[i + 1]}`
+  }
+  return close ? `${d}Z` : d
 }
 
 /** Один слой одним <path> — так браузер рисует сотни линий за один узел. */
@@ -39,10 +41,12 @@ const VIEW = { x: 210, y: 170, w: 660, h: 420 }
 // На телефоне тот же кадр даёт нечитаемо мелкие подписи — берём плотнее
 const VIEW_NARROW = { x: 268, y: 216, w: 508, h: 330 }
 
-const ZONES = {
-  Пушкин: { x: 678.7, y: 394.4, r: 118 },
-  Александровка: { x: 341.4, y: 303.8, r: 78 },
-}
+const ZONES = [
+  { id: 'pushkin', name: 'Пушкин', x: 678.7, y: 394.4, r: 118 },
+  { id: 'alexandrovka', name: 'Александровка', x: 341.4, y: 303.8, r: 78 },
+] as const
+
+const [PUSHKIN, ALEXANDROVKA] = ZONES
 
 export function OsmMap({ hover }: { hover: string | null }) {
   const [ref, seen] = useInView<HTMLDivElement>({ threshold: 0.2 })
@@ -62,7 +66,12 @@ export function OsmMap({ hover }: { hover: string | null }) {
     [],
   )
 
-  const dim = (name: string) => (hover && hover !== name ? 'is-dim' : hover === name ? 'is-hot' : '')
+  const dim = (name: string) => {
+    if (hover === name) {
+      return 'is-hot'
+    }
+    return hover ? 'is-dim' : ''
+  }
 
   return (
     <div className={`osm ${seen ? 'is-in' : ''}`} ref={ref}>
@@ -85,13 +94,9 @@ export function OsmMap({ hover }: { hover: string | null }) {
           {/* Внутри рабочих зон дороги светятся ярче — маска из двух кругов */}
           <mask id="osm-served">
             <rect x={V.x} y={V.y} width={V.w} height={V.h} fill="black" />
-            <circle cx={ZONES['Пушкин'].x} cy={ZONES['Пушкин'].y} r={ZONES['Пушкин'].r} fill="white" />
-            <circle
-              cx={ZONES['Александровка'].x}
-              cy={ZONES['Александровка'].y}
-              r={ZONES['Александровка'].r}
-              fill="white"
-            />
+            {ZONES.map((z) => (
+              <circle key={z.id} cx={z.x} cy={z.y} r={z.r} fill="white" />
+            ))}
           </mask>
           <linearGradient id="osm-link" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#c8a96a" stopOpacity=".15" />
@@ -104,11 +109,11 @@ export function OsmMap({ hover }: { hover: string | null }) {
 
         {/* Координатная сетка поверх фона */}
         <g className="osm__grid">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <line key={`v${i}`} x1={V.x + i * 60} y1={V.y} x2={V.x + i * 60} y2={V.y + V.h} />
+          {Array.from({ length: 12 }, (_, i) => V.x + i * 60).map((x) => (
+            <line key={`v${x}`} x1={x} y1={V.y} x2={x} y2={V.y + V.h} />
           ))}
-          {Array.from({ length: 8 }).map((_, i) => (
-            <line key={`h${i}`} x1={V.x} y1={V.y + i * 60} x2={V.x + V.w} y2={V.y + i * 60} />
+          {Array.from({ length: 8 }, (_, i) => V.y + i * 60).map((y) => (
+            <line key={`h${y}`} x1={V.x} y1={y} x2={V.x + V.w} y2={y} />
           ))}
         </g>
 
@@ -127,17 +132,17 @@ export function OsmMap({ hover }: { hover: string | null }) {
 
         {/* Ореолы рабочих зон */}
         <circle
-          className={`osm__halo ${dim('Пушкин')}`}
-          cx={ZONES['Пушкин'].x}
-          cy={ZONES['Пушкин'].y}
-          r={ZONES['Пушкин'].r}
+          className={`osm__halo ${dim(PUSHKIN.name)}`}
+          cx={PUSHKIN.x}
+          cy={PUSHKIN.y}
+          r={PUSHKIN.r}
           fill="url(#osm-zone-a)"
         />
         <circle
-          className={`osm__halo ${dim('Александровка')}`}
-          cx={ZONES['Александровка'].x}
-          cy={ZONES['Александровка'].y}
-          r={ZONES['Александровка'].r}
+          className={`osm__halo ${dim(ALEXANDROVKA.name)}`}
+          cx={ALEXANDROVKA.x}
+          cy={ALEXANDROVKA.y}
+          r={ALEXANDROVKA.r}
           fill="url(#osm-zone-b)"
         />
 
@@ -149,18 +154,18 @@ export function OsmMap({ hover }: { hover: string | null }) {
         </g>
 
         {/* Границы зон */}
-        {(['Пушкин', 'Александровка'] as const).map((name) => (
-          <g key={name} className={`osm__ring ${dim(name)}`}>
-            <circle cx={ZONES[name].x} cy={ZONES[name].y} r={ZONES[name].r} className="osm__ring-dash" />
-            <circle cx={ZONES[name].x} cy={ZONES[name].y} r={6} className="osm__pin" />
-            <circle cx={ZONES[name].x} cy={ZONES[name].y} r={6} className="osm__pin-pulse" />
+        {ZONES.map((z) => (
+          <g key={z.id} className={`osm__ring ${dim(z.name)}`}>
+            <circle cx={z.x} cy={z.y} r={z.r} className="osm__ring-dash" />
+            <circle cx={z.x} cy={z.y} r={6} className="osm__pin" />
+            <circle cx={z.x} cy={z.y} r={6} className="osm__pin-pulse" />
           </g>
         ))}
 
         {/* Перегон между зонами */}
         <path
           className="osm__link"
-          d={`M${ZONES['Александровка'].x + 70} ${ZONES['Александровка'].y + 18} Q 510 ${ZONES['Александровка'].y + 90} ${ZONES['Пушкин'].x - 108} ${ZONES['Пушкин'].y - 14}`}
+          d={`M${ALEXANDROVKA.x + 70} ${ALEXANDROVKA.y + 18} Q 510 ${ALEXANDROVKA.y + 90} ${PUSHKIN.x - 108} ${PUSHKIN.y - 14}`}
           stroke="url(#osm-link)"
         />
         <text className="osm__link-label" x="512" y="386" textAnchor="middle">

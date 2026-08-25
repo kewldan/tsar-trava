@@ -1,11 +1,18 @@
-import { useEffect, useState, useMemo } from 'react'
-import { BRAND, NAV, CONTACTS } from '../content'
-import { useScrollProgress, useActiveSection, useScrollTo } from '../lib/hooks'
-import { Btn, Magnetic } from './ui/Primitives'
+import { useEffect, useMemo, useState } from 'react'
+import { BRAND, CONTACTS, NAV } from '../content'
+import { useActiveSection, useScrollProgress, useScrollTo } from '../lib/hooks'
+import { Btn, Magnetic } from './ui/primitives'
 
 function Mark() {
   return (
-    <svg className="nav__mark" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg
+      aria-hidden="true"
+      className="nav__mark"
+      viewBox="0 0 32 32"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
       <path d="M16 27V12" strokeLinecap="round" />
       <path d="M16 12c0-3.4 2.9-5.8 7-6.4.6 4-1.8 7.5-7 6.4Z" strokeLinejoin="round" />
       <path d="M16 16.5c0-3-2.5-5-6-5.5-.5 3.4 1.5 6.4 6 5.5Z" strokeLinejoin="round" />
@@ -50,20 +57,24 @@ export function Nav() {
   }
 
   const R = 15
-  const CIRC = 2 * Math.PI * R
+  const Circ = 2 * Math.PI * R
 
   return (
     <>
       <header className={`nav ${stuck ? 'is-stuck' : ''} ${hidden && !open ? 'is-hidden' : ''}`}>
         <div className="nav__inner">
+          {/* biome-ignore lint/a11y/useValidAnchor: это настоящая ссылка на #top — работает без JS и открывается в новой вкладке; onClick лишь заменяет прыжок плавной прокруткой */}
           <a
             className="nav__brand"
             href="#top"
             onClick={(e) => {
               e.preventDefault()
               const l = (window as unknown as { __lenis?: { scrollTo: (t: number, o?: object) => void } }).__lenis
-              if (l) l.scrollTo(0, { duration: 1.4 })
-              else window.scrollTo({ top: 0, behavior: 'smooth' })
+              if (l) {
+                l.scrollTo(0, { duration: 1.4 })
+              } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+              }
             }}
             data-cursor="hover"
           >
@@ -77,6 +88,7 @@ export function Nav() {
           <nav className="nav__links" aria-label="Разделы">
             {NAV.map((n) => (
               <button
+                type="button"
                 key={n.id}
                 className={`nav__link ${active === n.id ? 'is-active' : ''}`}
                 onClick={() => go(n.id)}
@@ -90,15 +102,15 @@ export function Nav() {
 
           <div className="nav__right">
             <div className="nav__progress" aria-hidden="true">
-              <svg width="34" height="34" viewBox="0 0 34 34">
+              <svg aria-hidden="true" width="34" height="34" viewBox="0 0 34 34">
                 <circle className="bg" cx="17" cy="17" r={R} />
                 <circle
                   className="fg"
                   cx="17"
                   cy="17"
                   r={R}
-                  strokeDasharray={CIRC}
-                  strokeDashoffset={CIRC * (1 - progress)}
+                  strokeDasharray={Circ}
+                  strokeDashoffset={Circ * (1 - progress)}
                 />
               </svg>
               <span>{Math.round(progress * 100)}</span>
@@ -110,6 +122,7 @@ export function Nav() {
 
             <Magnetic strength={0.2}>
               <button
+                type="button"
                 className={`nav__burger ${open ? 'is-open' : ''}`}
                 onClick={() => setOpen((v) => !v)}
                 aria-label={open ? 'Закрыть меню' : 'Открыть меню'}
@@ -130,6 +143,7 @@ export function Nav() {
           {NAV.map((n, i) => (
             <li className="menu__item" key={n.id}>
               <button
+                type="button"
                 className="menu__link"
                 style={{ transitionDelay: `${open ? 120 + i * 55 : 0}ms` }}
                 onClick={() => go(n.id)}

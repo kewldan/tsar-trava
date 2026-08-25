@@ -1,9 +1,12 @@
-import { useMemo, type ReactNode, type ElementType, type ComponentPropsWithRef } from 'react'
-import { useInView, useCountUp, useMagnetic, fmt } from '../../lib/hooks'
+import { type ComponentPropsWithRef, type ElementType, type ReactNode, useMemo } from 'react'
+import { fmt, useCountUp, useInView, useMagnetic } from '../../lib/hooks'
+
+const WHITESPACE_SPLIT = /(\s+)/
+const ONLY_WHITESPACE = /^\s+$/
 
 /* ── Reveal: маска снизу вверх при появлении ─────────────── */
 
-type RevealProps = {
+interface RevealProps {
   children: ReactNode
   delay?: number
   as?: ElementType
@@ -23,6 +26,7 @@ export function Reveal({ children, delay = 0, as = 'div', className = '', y = 26
       className={`rv rv--${mode} ${seen ? 'is-in' : ''} ${className}`}
       style={{ '--rv-delay': `${delay}ms`, '--rv-y': `${y}px` } as React.CSSProperties}
     >
+      {/* biome-ignore lint/suspicious/noLeakedRender: children — контракт React, а не условие; оборачивать их всегда нельзя, иначе ломается flex-раскладка у mode="fade" */}
       {mode === 'mask' ? <span className="rv__inner">{children}</span> : children}
     </Tag>
   )
@@ -46,19 +50,22 @@ export function SplitText({
   as?: ElementType
 }) {
   const [ref, seen] = useInView<HTMLSpanElement>({ threshold: 0.25 })
-  const parts = useMemo(() => (by === 'char' ? Array.from(text) : text.split(/(\s+)/)), [text, by])
+  const parts = useMemo(() => (by === 'char' ? Array.from(text) : text.split(WHITESPACE_SPLIT)), [text, by])
   const Tag = as as unknown as ElementType<ComponentPropsWithRef<'span'>>
 
   return (
     <Tag ref={ref} className={`split ${seen ? 'is-in' : ''} ${className}`} aria-label={text}>
       {parts.map((p, i) => {
-        if (p === ' ' || /^\s+$/.test(p))
+        if (p === ' ' || ONLY_WHITESPACE.test(p)) {
           return (
+            // biome-ignore lint/suspicious/noArrayIndexKey: разбиение фиксированной строки, символы повторяются и различимы только позицией
             <span key={i} className="split__space">
               &nbsp;
             </span>
           )
+        }
         return (
+          // biome-ignore lint/suspicious/noArrayIndexKey: тот же разбор строки — устойчивого ключа у символа нет
           <span key={i} className="split__box" aria-hidden="true">
             <span className="split__part" style={{ transitionDelay: `${delay + i * stagger}ms` }}>
               {p}
@@ -133,6 +140,7 @@ export function Marquee({
   const track = (key: string) => (
     <div className="marquee__track" key={key} aria-hidden={key === 'b'}>
       {items.map((t, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: лента статична и может содержать повторяющиеся подписи
         <span className="marquee__item" key={i}>
           <span>{t}</span>
           <i className="marquee__sep">{separator}</i>
@@ -179,13 +187,21 @@ export function Btn({
           {children}
         </span>
       </span>
-      {arrow && (
+      {arrow ? (
         <span className="btn__arrow" aria-hidden="true">
-          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.4">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 16 16"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+          >
             <path d="M2 8h11M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </span>
-      )}
+      ) : null}
     </>
   )
 

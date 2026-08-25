@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useEffect, useRef, useState } from 'react'
 import { PROCESS } from '../content'
-import { Reveal } from './ui/Primitives'
 import { useMediaQuery, useReducedMotion } from '../lib/hooks'
+import { Reveal } from './ui/primitives'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -15,10 +15,14 @@ export function Process() {
   const reduced = useReducedMotion()
 
   useEffect(() => {
-    if (isNarrow || reduced) return
+    if (isNarrow || reduced) {
+      return
+    }
     const sec = section.current
     const tr = track.current
-    if (!sec || !tr) return
+    if (!(sec && tr)) {
+      return
+    }
 
     const ctx = gsap.context(() => {
       const distance = () => tr.scrollWidth - window.innerWidth + window.innerWidth * 0.08
@@ -48,7 +52,9 @@ export function Process() {
 
     // Шрифты приезжают позже и меняют ширину трека
     const refresh = () => ScrollTrigger.refresh()
-    document.fonts?.ready.then(refresh).catch(() => {})
+    document.fonts?.ready.then(refresh).catch(() => {
+      // Шрифты могут не приехать — пересчёт ширины не критичен
+    })
 
     return () => ctx.revert()
   }, [isNarrow, reduced])
@@ -67,8 +73,8 @@ export function Process() {
               Пять шагов <span className="italic-serif brass">от сообщения</span> до отчёта
             </Reveal>
             <div className="process__meter" aria-hidden="true">
-              {PROCESS.map((_, i) => (
-                <span key={i} className={i <= active ? 'is-on' : ''} />
+              {PROCESS.map((s, i) => (
+                <span key={s.num} className={i <= active ? 'is-on' : ''} />
               ))}
               <em className="mono">
                 {String(active + 1).padStart(2, '0')} / {String(PROCESS.length).padStart(2, '0')}

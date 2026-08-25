@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { BEFORE_AFTER } from '../content'
-import { Reveal } from './ui/Primitives'
 import { clamp } from '../lib/hooks'
+import { Reveal } from './ui/primitives'
 
 /** Запущенный газон: пятна, мох, проплешины, никакого рисунка. */
 function LawnBefore() {
@@ -53,7 +53,7 @@ function LawnBefore() {
           const y = 300 + ((i * 137) % 420)
           const h = 16 + ((i * 53) % 30)
           const tilt = (((i * 71) % 40) - 20) * 1.4
-          return <path key={i} d={`M${x} ${y} q ${tilt / 2} ${-h / 2} ${tilt} ${-h}`} />
+          return <path key={`b${x}-${y}`} d={`M${x} ${y} q ${tilt / 2} ${-h / 2} ${tilt} ${-h}`} />
         })}
       </g>
 
@@ -101,7 +101,7 @@ function LawnAfter() {
         {Array.from({ length: 260 }).map((_, i) => {
           const x = (i * 61.3) % 1200
           const y = 210 + ((i * 149) % 480)
-          return <path key={i} d={`M${x} ${y} l 11 -19`} />
+          return <path key={`a${x}-${y}`} d={`M${x} ${y} l 11 -19`} />
         })}
       </g>
 
@@ -117,14 +117,18 @@ export function BeforeAfter() {
 
   const setFromX = useCallback((clientX: number) => {
     const el = wrap.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     const r = el.getBoundingClientRect()
     setPos(clamp((clientX - r.left) / r.width, 0.02, 0.98))
   }, [])
 
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
-      if (!dragging.current) return
+      if (!dragging.current) {
+        return
+      }
       setFromX(e.clientX)
     }
     const onUp = () => {
@@ -140,8 +144,12 @@ export function BeforeAfter() {
   }, [setFromX])
 
   const onKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowLeft') setPos((p) => clamp(p - 0.04, 0.02, 0.98))
-    if (e.key === 'ArrowRight') setPos((p) => clamp(p + 0.04, 0.02, 0.98))
+    if (e.key === 'ArrowLeft') {
+      setPos((p) => clamp(p - 0.04, 0.02, 0.98))
+    }
+    if (e.key === 'ArrowRight') {
+      setPos((p) => clamp(p + 0.04, 0.02, 0.98))
+    }
   }
 
   return (
@@ -197,7 +205,15 @@ export function BeforeAfter() {
             >
               <span className="ba__handle-line" />
               <span className="ba__handle-knob">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                >
                   <path d="M9 7 4 12l5 5M15 7l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>

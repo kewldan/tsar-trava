@@ -13,13 +13,19 @@ export function Cursor() {
   const [label, setLabel] = useState('')
 
   useEffect(() => {
-    if (window.matchMedia('(pointer: coarse)').matches) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (window.matchMedia('(pointer: coarse)').matches) {
+      return
+    }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return
+    }
 
     const w = wrap.current
     const d = dot.current
     const r = ring.current
-    if (!w || !d || !r) return
+    if (!(w && d && r)) {
+      return
+    }
 
     let mx = window.innerWidth / 2
     let my = window.innerHeight / 2
