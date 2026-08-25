@@ -12,7 +12,14 @@ import { lerp } from '../lib/hooks'
  * быстрое смыкание, медленное раскрытие — как у настоящих ножниц.
  */
 
-const EXTRUDE = { depth: 0.05, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.012, bevelSegments: 3, curveSegments: 24 }
+const EXTRUDE = {
+  depth: 0.05,
+  bevelEnabled: true,
+  bevelThickness: 0.012,
+  bevelSize: 0.012,
+  bevelSegments: 3,
+  curveSegments: 24,
+}
 
 /** Половинка: лезвие от винта к кончику + хвостовик к кольцу. */
 function bladeShape() {

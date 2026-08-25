@@ -37,7 +37,14 @@ function LawnBefore() {
 
       {/* Кривая дорожка без кромки */}
       <path d="M-40 700 C 280 620, 520 600, 1240 470 L 1240 750 L -40 750 Z" fill="#151710" opacity=".9" />
-      <path d="M-40 700 C 280 620, 520 600, 1240 470" stroke="#3a3a28" strokeWidth="3" fill="none" opacity=".7" strokeDasharray="26 14 9 18" />
+      <path
+        d="M-40 700 C 280 620, 520 600, 1240 470"
+        stroke="#3a3a28"
+        strokeWidth="3"
+        fill="none"
+        opacity=".7"
+        strokeDasharray="26 14 9 18"
+      />
 
       {/* Хаотично торчащая трава */}
       <g stroke="#28402d" strokeWidth="2.4" strokeLinecap="round" opacity=".85">
@@ -66,9 +73,9 @@ function LawnAfter() {
           <stop offset="55%" stopColor="#1f5c3a" />
           <stop offset="100%" stopColor="#0f2b1c" />
         </linearGradient>
-        <pattern id="ba-a-stripe" width="112" height="112" patternUnits="userSpaceOnUse" patternTransform="rotate(-32)">
-          <rect width="56" height="112" fill="#ffffff" opacity=".085" />
-          <rect x="56" width="56" height="112" fill="#000000" opacity=".14" />
+        <pattern id="ba-a-stripe" width="76" height="76" patternUnits="userSpaceOnUse" patternTransform="rotate(-32)">
+          <rect width="38" height="76" fill="#ffffff" opacity=".062" />
+          <rect x="38" width="38" height="76" fill="#000000" opacity=".11" />
         </pattern>
         <radialGradient id="ba-a-moon" cx="72%" cy="16%">
           <stop offset="0%" stopColor="#e3c88f" stopOpacity=".38" />
@@ -91,9 +98,9 @@ function LawnAfter() {
 
       {/* Ровный ворс по направлению полос */}
       <g stroke="#2f8a55" strokeWidth="1.6" strokeLinecap="round" opacity=".5">
-        {Array.from({ length: 150 }).map((_, i) => {
-          const x = (i * 83.7) % 1200
-          const y = 250 + ((i * 149) % 430)
+        {Array.from({ length: 260 }).map((_, i) => {
+          const x = (i * 61.3) % 1200
+          const y = 210 + ((i * 149) % 480)
           return <path key={i} d={`M${x} ${y} l 11 -19`} />
         })}
       </g>
@@ -178,8 +185,16 @@ export function BeforeAfter() {
               <span className="ba__cap ba__cap--l mono">{BEFORE_AFTER.captionBefore}</span>
             </div>
 
-            <div className="ba__handle" role="slider" tabIndex={0} aria-label="Сравнение до и после"
-                 aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pos * 100)} onKeyDown={onKey}>
+            <div
+              className="ba__handle"
+              role="slider"
+              tabIndex={0}
+              aria-label="Сравнение до и после"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(pos * 100)}
+              onKeyDown={onKey}
+            >
               <span className="ba__handle-line" />
               <span className="ba__handle-knob">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.6">

@@ -40,13 +40,14 @@ export function Faq() {
         <div className="faq__grid">
           <div className="faq__side">
             <Reveal as="h2" className="h-1" y={44}>
-              Десять вопросов,<br />
+              Десять вопросов,
+              <br />
               которые <span className="italic-serif brass">задают всегда</span>
             </Reveal>
             <Reveal mode="fade" delay={160}>
               <p className="body-s faq__side-note">
-                Если вашего вопроса здесь нет — напишите. Отвечаем сами, без скриптов, и честно говорим,
-                когда работа вам не нужна.
+                Если вашего вопроса здесь нет — напишите. Отвечаем сами, без скриптов, и честно говорим, когда работа
+                вам не нужна.
               </p>
             </Reveal>
             <Reveal mode="fade" delay={240}>

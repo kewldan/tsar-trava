@@ -63,7 +63,14 @@ function Card({ s, i }: { s: (typeof SERVICES)[number]; i: number }) {
         <header className="svc__head">
           <span className="svc__num mono">{s.num}</span>
           <span className="svc__icon" aria-hidden="true">
-            <svg viewBox="0 0 44 44" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              viewBox="0 0 44 44"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               {ICONS[s.icon]}
             </svg>
           </span>
@@ -106,13 +113,14 @@ export function Services() {
 
         <div className="services__intro">
           <Reveal as="h2" className="h-1" y={40}>
-            Шесть работ,<br />
+            Шесть работ,
+            <br />
             из которых <span className="italic-serif brass">складывается</span> газон
           </Reveal>
           <Reveal mode="fade" delay={180} className="services__note">
             <p className="body-s">
-              Каждая работа имеет свой сезон и свою частоту. Мы не продаём аэрацию весной,
-              если дёрн ещё не уплотнён, и не косим в дождь, потому что мокрый лист рвётся.
+              Каждая работа имеет свой сезон и свою частоту. Мы не продаём аэрацию весной, если дёрн ещё не уплотнён,
+              и не косим в дождь, потому что мокрый лист рвётся.
             </p>
           </Reveal>
         </div>

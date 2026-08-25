@@ -19,15 +19,17 @@ import fs from 'node:fs'
 const SP = process.argv[2]
 const OUT = process.argv[3]
 
-const BBOX = { s: 59.680, w: 30.280, n: 59.762, e: 30.480 }
+const BBOX = { s: 59.68, w: 30.28, n: 59.762, e: 30.48 }
 const WIDTH = 1000
 
 // Web Mercator
 const mx = (lon) => (lon * Math.PI) / 180
 const my = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360))
 
-const x0 = mx(BBOX.w), x1 = mx(BBOX.e)
-const y0 = my(BBOX.n), y1 = my(BBOX.s) // y растёт вниз в экранных координатах
+const x0 = mx(BBOX.w),
+  x1 = mx(BBOX.e)
+const y0 = my(BBOX.n),
+  y1 = my(BBOX.s) // y растёт вниз в экранных координатах
 const scale = WIDTH / (x1 - x0)
 const HEIGHT = +Math.abs((y1 - y0) * scale).toFixed(1)
 
@@ -42,19 +44,29 @@ function simplify(pts, tol) {
   const stack = [[0, pts.length - 1]]
   while (stack.length) {
     const [a, b] = stack.pop()
-    let maxD = 0, idx = -1
-    const [ax, ay] = pts[a], [bx, by] = pts[b]
-    const dx = bx - ax, dy = by - ay
+    let maxD = 0,
+      idx = -1
+    const [ax, ay] = pts[a],
+      [bx, by] = pts[b]
+    const dx = bx - ax,
+      dy = by - ay
     const len = dx * dx + dy * dy
     for (let i = a + 1; i < b; i++) {
       const [px, py] = pts[i]
       let t = len ? ((px - ax) * dx + (py - ay) * dy) / len : 0
       t = t < 0 ? 0 : t > 1 ? 1 : t
-      const qx = ax + t * dx, qy = ay + t * dy
+      const qx = ax + t * dx,
+        qy = ay + t * dy
       const d = (px - qx) ** 2 + (py - qy) ** 2
-      if (d > maxD) { maxD = d; idx = i }
+      if (d > maxD) {
+        maxD = d
+        idx = i
+      }
     }
-    if (maxD > sq && idx > 0) { keep[idx] = 1; stack.push([a, idx], [idx, b]) }
+    if (maxD > sq && idx > 0) {
+      keep[idx] = 1
+      stack.push([a, idx], [idx, b])
+    }
   }
   return pts.filter((_, i) => keep[i])
 }
@@ -64,7 +76,6 @@ const osm = JSON.parse(fs.readFileSync(`${SP}/osm.json`, 'utf8'))
 const HW = (t) => (t || '').replace(/_link$/, '')
 const layers = { green: [], water: [], waterway: [], rail: [], major: [], mid: [], minor: [] }
 
-let skipped = 0
 for (const el of osm.elements) {
   if (el.type !== 'way' || !el.geometry) continue
   const t = el.tags || {}
@@ -80,7 +91,7 @@ for (const el of osm.elements) {
     else if (['secondary', 'tertiary'].includes(h)) layer = 'mid'
     else layer = 'minor'
   }
-  if (!layer) { skipped++; continue }
+  if (!layer) continue
 
   // Обрезаем по bbox грубо: пропускаем точки далеко за краем
   let pts = el.geometry.map((g) => P(g.lat, g.lon))
@@ -89,8 +100,16 @@ for (const el of osm.elements) {
   if (pts.length < 2) continue
 
   // Маленькие пятна выкидываем — на экране их всё равно не видно
-  let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9
-  for (const [x, y] of pts) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y }
+  let minX = 1e9,
+    maxX = -1e9,
+    minY = 1e9,
+    maxY = -1e9
+  for (const [x, y] of pts) {
+    if (x < minX) minX = x
+    if (x > maxX) maxX = x
+    if (y < minY) minY = y
+    if (y > maxY) maxY = y
+  }
   const span = Math.max(maxX - minX, maxY - minY)
   if ((layer === 'green' || layer === 'water') && span < 9) continue
   if (layer === 'minor' && span < 4) continue
@@ -101,7 +120,16 @@ for (const el of osm.elements) {
 }
 
 const places = JSON.parse(fs.readFileSync(`${SP}/places.json`, 'utf8'))
-const wanted = new Set(['Пушкин', 'Александровская', 'Павловск', 'Тярлево', 'Гуммолосары', 'София', 'Славянка', 'Детскосельский'])
+const wanted = new Set([
+  'Пушкин',
+  'Александровская',
+  'Павловск',
+  'Тярлево',
+  'Гуммолосары',
+  'София',
+  'Славянка',
+  'Детскосельский',
+])
 const labels = places.elements
   .filter((e) => e.tags?.name && wanted.has(e.tags.name))
   .map((e) => {

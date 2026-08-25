@@ -5,12 +5,20 @@ import { Reveal, Btn } from './ui/Primitives'
 type Status = 'idle' | 'sending' | 'sent' | 'error'
 
 export function Cta() {
-  const [form, setForm] = useState({ name: '', contact: '', address: TERRITORY.zones[0].name, area: '', plan: PRICING.plans[1].name, note: '' })
+  const [form, setForm] = useState({
+    name: '',
+    contact: '',
+    address: TERRITORY.zones[0].name,
+    area: '',
+    plan: PRICING.plans[1].name,
+    note: '',
+  })
   const [status, setStatus] = useState<Status>('idle')
   const [touched, setTouched] = useState(false)
 
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-    setForm((f) => ({ ...f, [k]: e.target.value }))
+  const set =
+    (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+      setForm((f) => ({ ...f, [k]: e.target.value }))
 
   const valid = form.name.trim().length > 1 && form.contact.trim().length > 2
 
@@ -84,7 +92,14 @@ export function Cta() {
               {CTA.benefits.map((b, i) => (
                 <Reveal key={b} as="li" mode="fade" delay={200 + i * 100}>
                   <span className="cta__check" aria-hidden="true">
-                    <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <svg
+                      viewBox="0 0 14 14"
+                      width="12"
+                      height="12"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
                       <path d="M2.5 7.4 5.6 10.5 11.5 3.8" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </span>
@@ -115,7 +130,12 @@ export function Cta() {
 
                 <label className={`field ${touched && form.contact.trim().length < 3 ? 'is-bad' : ''}`}>
                   <span className="field__label mono">Telegram или телефон</span>
-                  <input value={form.contact} onChange={set('contact')} placeholder="@username или +7…" autoComplete="tel" />
+                  <input
+                    value={form.contact}
+                    onChange={set('contact')}
+                    placeholder="@username или +7…"
+                    autoComplete="tel"
+                  />
                   <span className="field__line" aria-hidden="true" />
                 </label>
 
@@ -159,7 +179,12 @@ export function Cta() {
 
                 <label className="field">
                   <span className="field__label mono">Что важно знать заранее</span>
-                  <textarea value={form.note} onChange={set('note')} rows={3} placeholder="Собака во дворе, крутой склон, спрятанный люк…" />
+                  <textarea
+                    value={form.note}
+                    onChange={set('note')}
+                    rows={3}
+                    placeholder="Собака во дворе, крутой склон, спрятанный люк…"
+                  />
                   <span className="field__line" aria-hidden="true" />
                 </label>
               </div>

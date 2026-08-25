@@ -89,12 +89,7 @@ export function Equipment() {
 
         <div className="equip__list">
           {EQUIPMENT.items.map((it, i) => (
-            <Reveal
-              key={it.name}
-              mode="fade"
-              delay={i * 60}
-              className={`equip__row ${hot === i ? 'is-hot' : ''}`}
-            >
+            <Reveal key={it.name} mode="fade" delay={i * 60} className={`equip__row ${hot === i ? 'is-hot' : ''}`}>
               <div
                 className="equip__row-in"
                 onMouseEnter={() => setHot(i)}

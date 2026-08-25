@@ -17,7 +17,14 @@ function Member({ m, i }: { m: (typeof TEAM)[number]; i: number }) {
         data-cursor-label={open ? 'свернуть' : 'подробнее'}
       >
         <div className="member__frame">
-          <img className="member__photo" src={asset(m.photo)} alt={`${m.name} — ${m.role}`} loading="lazy" width={600} height={800} />
+          <img
+            className="member__photo"
+            src={asset(m.photo)}
+            alt={`${m.name} — ${m.role}`}
+            loading="lazy"
+            width={600}
+            height={800}
+          />
           <span className="member__scrim" aria-hidden="true" />
           <span className="member__stripes" aria-hidden="true" />
 
@@ -73,13 +80,14 @@ export function Team() {
 
         <div className="team__top">
           <Reveal as="h2" className="h-1" y={44}>
-            Три человека.<br />
+            Три человека.
+            <br />
             Не <span className="italic-serif brass">«бригада»</span>, не подрядчики
           </Reveal>
           <Reveal mode="fade" delay={160}>
             <p className="lead team__lead">
-              За вашим адресом закреплён конкретный мастер — он приезжает весь сезон и помнит ваш участок
-              лучше, чем вы сами. Ниже — все, кто вообще может к вам приехать. Больше никого нет.
+              За вашим адресом закреплён конкретный мастер — он приезжает весь сезон и помнит ваш участок лучше, чем
+              вы сами. Ниже — все, кто вообще может к вам приехать. Больше никого нет.
             </p>
           </Reveal>
         </div>
@@ -92,8 +100,8 @@ export function Team() {
 
         <Reveal mode="fade" delay={200} className="team__note">
           <p className="body-s">
-            Штат не растёт намеренно. Четвёртый мастер — это либо расширение географии, либо падение
-            качества; мы выбрали первое не делать.
+            Штат не растёт намеренно. Четвёртый мастер — это либо расширение географии, либо падение качества; мы
+            выбрали первое не делать.
           </p>
           <Btn href={CONTACTS.telegram} variant="line">
             Узнать, кто закреплён за вашим адресом

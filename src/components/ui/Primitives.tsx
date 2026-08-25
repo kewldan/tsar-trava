@@ -52,7 +52,12 @@ export function SplitText({
   return (
     <Tag ref={ref} className={`split ${seen ? 'is-in' : ''} ${className}`} aria-label={text}>
       {parts.map((p, i) => {
-        if (p === ' ' || /^\s+$/.test(p)) return <span key={i} className="split__space">&nbsp;</span>
+        if (p === ' ' || /^\s+$/.test(p))
+          return (
+            <span key={i} className="split__space">
+              &nbsp;
+            </span>
+          )
         return (
           <span key={i} className="split__box" aria-hidden="true">
             <span className="split__part" style={{ transitionDelay: `${delay + i * stagger}ms` }}>
@@ -190,7 +195,13 @@ export function Btn({
     const ext = href.startsWith('http')
     return (
       <Magnetic strength={0.24}>
-        <a className={cls} href={href} target={ext ? '_blank' : undefined} rel={ext ? 'noreferrer' : undefined} data-cursor="hover">
+        <a
+          className={cls}
+          href={href}
+          target={ext ? '_blank' : undefined}
+          rel={ext ? 'noreferrer' : undefined}
+          data-cursor="hover"
+        >
           {inner}
         </a>
       </Magnetic>

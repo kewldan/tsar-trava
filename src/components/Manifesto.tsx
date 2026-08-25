@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { MANIFESTO, STATS } from '../content'
 import { Reveal, Counter } from './ui/Primitives'
 import { clamp } from '../lib/hooks'
@@ -48,18 +48,18 @@ function ScrollText({ text }: { text: string }) {
         const step = 1 / words.length
         const local = clamp((p - i * step * 0.72) / (step * 2.6), 0, 1)
         return (
-          <span
-            key={i}
-            className="manifest__word"
-            style={{
-              opacity: 0.11 + local * 0.89,
-              filter: `blur(${(1 - local) * 3.5}px)`,
-              transform: `translateY(${(1 - local) * 7}px)`,
-              color: local > 0.92 ? undefined : 'var(--cream)',
-            }}
-          >
-            {w}{' '}
-          </span>
+          <Fragment key={i}>
+            <span
+              className="manifest__word"
+              style={{
+                opacity: 0.11 + local * 0.89,
+                filter: `blur(${(1 - local) * 3.5}px)`,
+                transform: `translateY(${(1 - local) * 7}px)`,
+              }}
+            >
+              {w}
+            </span>{' '}
+          </Fragment>
         )
       })}
     </p>

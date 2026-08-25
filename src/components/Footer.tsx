@@ -14,14 +14,27 @@ export function Footer() {
         <Reveal className="footer__mega" y={60}>
           {/* textLength растягивает надпись точно по ширине блока —
               никакого подбора font-size под каждый брейкпоинт */}
-          <svg className="footer__mega-svg" viewBox="0 0 1000 150" preserveAspectRatio="xMidYMid meet" role="img" aria-label={BRAND.name}>
+          <svg
+            className="footer__mega-svg"
+            viewBox="0 0 1000 150"
+            preserveAspectRatio="xMidYMid meet"
+            role="img"
+            aria-label={BRAND.name}
+          >
             <defs>
               <linearGradient id="footer-mega" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="rgba(242,240,234,0.5)" />
                 <stop offset="100%" stopColor="rgba(242,240,234,0.05)" />
               </linearGradient>
             </defs>
-            <text x="500" y="122" textAnchor="middle" textLength="990" lengthAdjust="spacingAndGlyphs" fill="url(#footer-mega)">
+            <text
+              x="500"
+              y="122"
+              textAnchor="middle"
+              textLength="990"
+              lengthAdjust="spacingAndGlyphs"
+              fill="url(#footer-mega)"
+            >
               {BRAND.name}
             </text>
           </svg>
@@ -34,7 +47,13 @@ export function Footer() {
             </p>
             <div className="footer__contact">
               <Magnetic strength={0.2}>
-                <a className="footer__tg" href={CONTACTS.telegram} target="_blank" rel="noreferrer" data-cursor="hover">
+                <a
+                  className="footer__tg"
+                  href={CONTACTS.telegram}
+                  target="_blank"
+                  rel="noreferrer"
+                  data-cursor="hover"
+                >
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
                     <path d="M21.9 4.3 18.9 20c-.2 1-.8 1.2-1.6.8l-4.5-3.3-2.2 2.1c-.2.2-.5.5-.9.5l.3-4.6 8.4-7.6c.4-.3-.1-.5-.6-.2L7.4 13.2 2.9 11.8c-1-.3-1-1 .2-1.5l17.5-6.7c.8-.3 1.5.2 1.3 1.7Z" />
                   </svg>

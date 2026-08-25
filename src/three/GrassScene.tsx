@@ -1,14 +1,7 @@
 import { useMemo, useRef, useState, useEffect, Suspense } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import {
-  GRASS_VERT,
-  GRASS_FRAG,
-  GROUND_VERT,
-  GROUND_FRAG,
-  POLLEN_VERT,
-  POLLEN_FRAG,
-} from './grassShaders'
+import { GRASS_VERT, GRASS_FRAG, GROUND_VERT, GROUND_FRAG, POLLEN_VERT, POLLEN_FRAG } from './grassShaders'
 import { lerp, useReducedMotion } from '../lib/hooks'
 
 const C = {

@@ -66,7 +66,11 @@ export function OsmMap({ hover }: { hover: string | null }) {
 
   return (
     <div className={`osm ${seen ? 'is-in' : ''}`} ref={ref}>
-      <svg viewBox={`${V.x} ${V.y} ${V.w} ${V.h}`} role="img" aria-label="Карта Пушкина и Александровской с зонами обслуживания">
+      <svg
+        viewBox={`${V.x} ${V.y} ${V.w} ${V.h}`}
+        role="img"
+        aria-label="Карта Пушкина и Александровской с зонами обслуживания"
+      >
         <defs>
           <radialGradient id="osm-zone-a" cx="50%" cy="50%">
             <stop offset="0%" stopColor="#2f8a55" stopOpacity=".55" />
@@ -82,7 +86,12 @@ export function OsmMap({ hover }: { hover: string | null }) {
           <mask id="osm-served">
             <rect x={V.x} y={V.y} width={V.w} height={V.h} fill="black" />
             <circle cx={ZONES['Пушкин'].x} cy={ZONES['Пушкин'].y} r={ZONES['Пушкин'].r} fill="white" />
-            <circle cx={ZONES['Александровка'].x} cy={ZONES['Александровка'].y} r={ZONES['Александровка'].r} fill="white" />
+            <circle
+              cx={ZONES['Александровка'].x}
+              cy={ZONES['Александровка'].y}
+              r={ZONES['Александровка'].r}
+              fill="white"
+            />
           </mask>
           <linearGradient id="osm-link" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#c8a96a" stopOpacity=".15" />
@@ -179,9 +188,15 @@ export function OsmMap({ hover }: { hover: string | null }) {
 
         {/* Служебная разметка */}
         <g className="osm__marks">
-          <text x={V.x + 14} y={V.y + 24}>OPENSTREETMAP · ODbL</text>
-          <text x={V.x + V.w - 14} y={V.y + 24} textAnchor="end">59.72° N · 30.41° E</text>
-          <text x={V.x + 14} y={V.y + V.h - 14}>ЗОНЫ ВЫЕЗДА · СЕЗОН 2026</text>
+          <text x={V.x + 14} y={V.y + 24}>
+            OPENSTREETMAP · ODbL
+          </text>
+          <text x={V.x + V.w - 14} y={V.y + 24} textAnchor="end">
+            59.72° N · 30.41° E
+          </text>
+          <text x={V.x + 14} y={V.y + V.h - 14}>
+            ЗОНЫ ВЫЕЗДА · СЕЗОН 2026
+          </text>
         </g>
 
         {/* Масштабная линейка: 1000 px viewBox ≈ 11,2 км по долготе на этой широте */}
@@ -189,15 +204,29 @@ export function OsmMap({ hover }: { hover: string | null }) {
           <line x1={V.x + V.w - 110} y1={V.y + V.h - 18} x2={V.x + V.w - 21} y2={V.y + V.h - 18} />
           <line x1={V.x + V.w - 110} y1={V.y + V.h - 23} x2={V.x + V.w - 110} y2={V.y + V.h - 13} />
           <line x1={V.x + V.w - 21} y1={V.y + V.h - 23} x2={V.x + V.w - 21} y2={V.y + V.h - 13} />
-          <text x={V.x + V.w - 65} y={V.y + V.h - 26} textAnchor="middle">1 км</text>
+          <text x={V.x + V.w - 65} y={V.y + V.h - 26} textAnchor="middle">
+            1 км
+          </text>
         </g>
       </svg>
 
       <div className="osm__legend">
-        <span><i className="k-served" />зона выезда</span>
-        <span><i className="k-road" />дороги вне зоны</span>
-        <span><i className="k-green" />парки и лес</span>
-        <span><i className="k-water" />вода</span>
+        <span>
+          <i className="k-served" />
+          зона выезда
+        </span>
+        <span>
+          <i className="k-road" />
+          дороги вне зоны
+        </span>
+        <span>
+          <i className="k-green" />
+          парки и лес
+        </span>
+        <span>
+          <i className="k-water" />
+          вода
+        </span>
         <em>© OpenStreetMap contributors · ODbL · данные обработаны локально</em>
       </div>
     </div>

@@ -189,11 +189,7 @@ export function useCountUp(target: number, active: boolean, duration = 1900) {
   const reduced = useReducedMotion()
 
   useEffect(() => {
-    if (!active) return
-    if (reduced) {
-      setValue(target)
-      return
-    }
+    if (!active || reduced) return
     let raf = 0
     let t0 = 0
     const step = (t: number) => {
@@ -207,7 +203,7 @@ export function useCountUp(target: number, active: boolean, duration = 1900) {
     return () => cancelAnimationFrame(raf)
   }, [target, active, duration, reduced])
 
-  return value
+  return reduced ? target : value
 }
 
 /** Прогресс прокрутки страницы 0..1 */

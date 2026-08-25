@@ -1,13 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { BRAND } from '../content'
 
-const LINES = [
-  'ЗАТАЧИВАЕМ НОЖИ',
-  'НАТЯГИВАЕМ ШНУР',
-  'ВЫСТАВЛЯЕМ ВЫСОТУ СРЕЗА',
-  'СЕЕМ ПОЛЕ',
-  'ЗАПУСКАЕМ ДВИГАТЕЛЬ',
-]
+const LINES = ['ЗАТАЧИВАЕМ НОЖИ', 'НАТЯГИВАЕМ ШНУР', 'ВЫСТАВЛЯЕМ ВЫСОТУ СРЕЗА', 'СЕЕМ ПОЛЕ', 'ЗАПУСКАЕМ ДВИГАТЕЛЬ']
 
 /**
  * Прелоадер не крутится по таймеру, а ждёт реальных событий:
@@ -33,11 +27,13 @@ export function Preloader({
   const startedAt = useRef(0)
 
   useEffect(() => {
-    document.fonts?.ready.then(() => {
-      fontsDone.current = true
-    }).catch(() => {
-      fontsDone.current = true
-    })
+    document.fonts?.ready
+      .then(() => {
+        fontsDone.current = true
+      })
+      .catch(() => {
+        fontsDone.current = true
+      })
     // Даже если шрифты молчат — не держим экран дольше 2,5 с
     const t = setTimeout(() => {
       fontsDone.current = true

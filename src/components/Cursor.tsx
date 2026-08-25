@@ -60,8 +60,12 @@ export function Cursor() {
     }
 
     const onLeave = () => w.classList.add('is-hidden')
-    const onDown = () => { r.style.setProperty('scale', '0.82') }
-    const onUp = () => { r.style.setProperty('scale', '1') }
+    const onDown = () => {
+      r.style.setProperty('scale', '0.82')
+    }
+    const onUp = () => {
+      r.style.setProperty('scale', '1')
+    }
 
     window.addEventListener('pointermove', onMove, { passive: true })
     document.addEventListener('pointerleave', onLeave)

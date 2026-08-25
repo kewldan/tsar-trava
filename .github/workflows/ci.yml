@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Пуш поверх незавершённого прогона отменяет предыдущий: смысла
+# проверять устаревший коммит нет.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Типы, линтер, формат
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Шаги не прерывают друг друга: с одного прогона видно
+      # все проблемы сразу, а не первую попавшуюся
+      - name: Проверка типов
+        if: '!cancelled()'
+        run: npm run typecheck
+
+      - name: ESLint
+        if: '!cancelled()'
+        run: npm run lint
+
+      - name: Prettier
+        if: '!cancelled()'
+        run: npm run format:check
+
+  build:
+    name: Сборка
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx vite build
+
+      - name: Размер бандла
+        run: |
+          echo '### Размер сборки' >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo '| Файл | Размер | gzip |' >> "$GITHUB_STEP_SUMMARY"
+          echo '|---|---:|---:|' >> "$GITHUB_STEP_SUMMARY"
+          for f in dist/assets/*.js dist/assets/*.css; do
+            raw=$(stat -c%s "$f")
+            gz=$(gzip -c "$f" | wc -c)
+            printf '| `%s` | %s KB | %s KB |\n' \
+              "$(basename "$f")" \
+              "$(awk "BEGIN{printf \"%.1f\", $raw/1024}")" \
+              "$(awk "BEGIN{printf \"%.1f\", $gz/1024}")" >> "$GITHUB_STEP_SUMMARY"
+          done
+          total=$(cat dist/assets/*.js dist/assets/*.css | gzip -c | wc -c)
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          printf '**Итого gzip: %s KB**\n' "$(awk "BEGIN{printf \"%.0f\", $total/1024}")" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Порог размера
+        run: |
+          # Страховка от случайного тяжёлого импорта. Порог поднимать
+          # осознанно, вместе с объяснением в PR.
+          LIMIT_KB=520
+          total=$(cat dist/assets/*.js dist/assets/*.css | gzip -c | wc -c)
+          total_kb=$((total / 1024))
+          echo "Суммарно gzip: ${total_kb} KB (порог ${LIMIT_KB} KB)"
+          if [ "$total_kb" -gt "$LIMIT_KB" ]; then
+            echo "::error::Бандл вырос до ${total_kb} KB при пороге ${LIMIT_KB} KB"
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+
+  smoke:
+    name: Дымовой прогон в браузере
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Сборка из артефакта job «Сборка»
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Установка Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Прогон страницы
+        run: node scripts/smoke.mjs
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: smoke-screenshot
+          path: smoke-failure.png
+          retention-days: 7

@@ -34,9 +34,7 @@ function Plan({ p, mode, i }: { p: (typeof PRICING.plans)[number]; mode: Mode; i
               <span className="plan__price-unit">{p.unit}</span>
             </>
           )}
-          {mode === 'season' && !custom && (
-            <span className="plan__price-old">{fmt(p.priceOnce)} ₽</span>
-          )}
+          {mode === 'season' && !custom && <span className="plan__price-old">{fmt(p.priceOnce)} ₽</span>}
         </div>
 
         <p className="plan__note mono dim">{p.note}</p>
@@ -171,7 +169,9 @@ function Calculator({ mode }: { mode: Mode }) {
                     </svg>
                   </span>
                   <span className="calc__extra-t">{e.t}</span>
-                  <span className="calc__extra-p mono">+{fmt(e.price)} ₽/{e.per}</span>
+                  <span className="calc__extra-p mono">
+                    +{fmt(e.price)} ₽/{e.per}
+                  </span>
                 </button>
               ))}
             </div>
@@ -204,8 +204,8 @@ function Calculator({ mode }: { mode: Mode }) {
           )}
 
           <p className="calc__disclaimer body-s">
-            Прикидка по тарифу ИМПЕРАТОР. Точная цена — после бесплатного замера: рельеф, препятствия
-            и состояние дёрна могут её как поднять, так и опустить.
+            Прикидка по тарифу ИМПЕРАТОР. Точная цена — после бесплатного замера: рельеф, препятствия и состояние
+            дёрна могут её как поднять, так и опустить.
           </p>
 
           <Btn href={CONTACTS.telegram} variant="solid" className="calc__cta">
@@ -239,12 +239,12 @@ export function Pricing() {
 
           <Reveal mode="fade" delay={220}>
             <div className="toggle" role="group" aria-label="Режим оплаты">
-              <span className="toggle__pill" style={{ transform: `translateX(${mode === 'season' ? '100%' : '0'})` }} aria-hidden="true" />
-              <button
-                className={mode === 'once' ? 'is-on' : ''}
-                onClick={() => setMode('once')}
-                data-cursor="hover"
-              >
+              <span
+                className="toggle__pill"
+                style={{ transform: `translateX(${mode === 'season' ? '100%' : '0'})` }}
+                aria-hidden="true"
+              />
+              <button className={mode === 'once' ? 'is-on' : ''} onClick={() => setMode('once')} data-cursor="hover">
                 {PRICING.toggle.once}
               </button>
               <button

@@ -1,12 +1,8 @@
 import { TESTIMONIALS, TICKER } from '../content'
 import { Reveal, Marquee } from './ui/Primitives'
 
-export function Testimonials() {
-  // Две ленты навстречу друг другу
-  const rowA = TESTIMONIALS.slice(0, 3)
-  const rowB = TESTIMONIALS.slice(3)
-
-  const Row = ({ items, reverse }: { items: typeof TESTIMONIALS; reverse?: boolean }) => (
+function Row({ items, reverse }: { items: typeof TESTIMONIALS; reverse?: boolean }) {
+  return (
     <div className={`tst__row ${reverse ? 'tst__row--rev' : ''}`}>
       <div className="tst__track">
         {[...items, ...items].map((t, i) => (
@@ -28,6 +24,12 @@ export function Testimonials() {
       </div>
     </div>
   )
+}
+
+export function Testimonials() {
+  // Две ленты навстречу друг другу
+  const rowA = TESTIMONIALS.slice(0, 3)
+  const rowB = TESTIMONIALS.slice(3)
 
   return (
     <section className="section section--tight tst-sec">
