@@ -24,7 +24,8 @@
     "check:fix": "biome check --write .",
     "verify": "npm run typecheck && biome ci . && vite build",
     "smoke": "node scripts/smoke.mjs",
-    "shots": "node scripts/shots.mjs"
+    "shots": "node scripts/shots.mjs",
+    "images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "^9.7.0",

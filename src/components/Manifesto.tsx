@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
 import { MANIFESTO, STATS } from '../content'
-import { clamp } from '../lib/hooks'
+import { asset, clamp } from '../lib/hooks'
 import { Counter, Reveal } from './ui/primitives'
 
 /**
@@ -81,11 +81,31 @@ export function Manifesto() {
           <span className="sec-head__rule" />
         </div>
 
-        <ScrollText text={MANIFESTO.text} />
+        <div className="manifest__body">
+          <div className="manifest__text-col">
+            <ScrollText text={MANIFESTO.text} />
 
-        <Reveal mode="fade" delay={120} className="manifest__sign">
-          <span className="mono dim">{MANIFESTO.signature}</span>
-        </Reveal>
+            <Reveal mode="fade" delay={120} className="manifest__sign">
+              <span className="mono dim">{MANIFESTO.signature}</span>
+            </Reveal>
+          </div>
+
+          {/* Снимок с выезда рядом с утверждением: заявление и подтверждение в одном экране */}
+          <Reveal mode="fade" delay={200} className="manifest__shot">
+            <figure>
+              <img
+                src={asset('team/denis-working.jpg')}
+                alt="Мастер ведёт роторную косилку по газону перед домом"
+                width={768}
+                height={1376}
+                loading="lazy"
+                decoding="async"
+              />
+              <span className="manifest__shot-grain" aria-hidden="true" />
+              <figcaption className="mono">Среда, третий выезд · Александровка</figcaption>
+            </figure>
+          </Reveal>
+        </div>
 
         <div className="manifest__cols">
           {MANIFESTO.columns.map((c, i) => (

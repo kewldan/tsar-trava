@@ -31,7 +31,8 @@ const MIME = {
 /** id — якорь секции, extra — сдвиг в экранах от её верха. */
 const DESKTOP = [
   { file: 'hero', top: 0 },
-  { file: 'manifest', id: 'manifest', extra: 1.42 },
+  { file: 'manifest', id: 'manifest', extra: 0.55 },
+  { file: 'stats', id: 'manifest', extra: 1.42 },
   { file: 'services', id: 'services', extra: 0.42 },
   { file: 'territory', id: 'territory', extra: 0.62 },
   { file: 'process', id: 'process', extra: 0.62 },
@@ -80,20 +81,37 @@ const browser = await chromium.launch({
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 })
 
-/** Ставит страницу в кадр, описанный якорем секции и сдвигом в экранах. */
+/**
+ * Ставит страницу в кадр, описанный якорем секции и сдвигом в экранах.
+ *
+ * Доезжаем шагами, а не одним прыжком: IntersectionObserver не успевает
+ * отработать, если элемент за один кадр перескакивает из-под нижней
+ * границы экрана за верхнюю, и половина секции остаётся непроявленной.
+ */
 async function scrollToShot(page, shot) {
-  await page.evaluate((s) => {
+  const target = await page.evaluate((s) => {
     const el = s.id ? document.getElementById(s.id) : null
     const anchor = el ? el.getBoundingClientRect().top + window.scrollY - 24 : (s.top ?? 0)
-    const y = anchor + window.innerHeight * (s.extra ?? 0)
-
-    const lenis = window.__lenis
-    if (lenis) {
-      lenis.scrollTo(y, { immediate: true })
-    } else {
-      window.scrollTo(0, y)
-    }
+    return anchor + window.innerHeight * (s.extra ?? 0)
   }, shot)
+
+  const from = await page.evaluate(() => window.scrollY)
+  const steps = Math.max(1, Math.min(24, Math.round(Math.abs(target - from) / 320)))
+
+  for (let i = 1; i <= steps; i++) {
+    await page.evaluate(
+      (y) => {
+        const lenis = window.__lenis
+        if (lenis) {
+          lenis.scrollTo(y, { immediate: true })
+        } else {
+          window.scrollTo(0, y)
+        }
+      },
+      from + ((target - from) * i) / steps,
+    )
+    await page.waitForTimeout(140)
+  }
 }
 
 async function shoot(list, { width, height, quality }) {
