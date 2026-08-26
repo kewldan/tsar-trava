@@ -18,6 +18,7 @@ import { Services } from './components/Services'
 import { Team } from './components/Team'
 import { Territory } from './components/Territory'
 import { Testimonials } from './components/Testimonials'
+import { Ornament } from './components/ui/primitives'
 import { useReducedMotion } from './lib/hooks'
 
 const GrassScene = lazy(() => import('./three/GrassScene').then((m) => ({ default: m.GrassScene })))
@@ -124,21 +125,21 @@ export function App() {
         {/* Всё, что ниже героя, лежит на непрозрачной подложке — WebGL остаётся только вверху */}
         <div className="page__body">
           <Manifesto />
-          <div className="hairline shell" />
+          <Ornament />
           <Services />
-          <div className="hairline shell" />
+          <Ornament />
           <Territory />
           <Process />
-          <div className="hairline shell" />
+          <Ornament />
           <Equipment />
-          <div className="hairline shell" />
+          <Ornament />
           <BeforeAfter />
-          <div className="hairline shell" />
+          <Ornament />
           <Team />
-          <div className="hairline shell" />
+          <Ornament />
           <Pricing />
           <Testimonials />
-          <div className="hairline shell" />
+          <Ornament />
           <Faq />
           <Cta />
         </div>

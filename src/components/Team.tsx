@@ -75,7 +75,7 @@ export function Team() {
     <section className="section team" id="team">
       <div className="shell">
         <div className="sec-head">
-          <span className="sec-head__num">06</span>
+          <span className="sec-head__num">VI</span>
           <span className="sec-head__label">Мастера</span>
           <span className="sec-head__rule" />
         </div>

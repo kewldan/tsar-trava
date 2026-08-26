@@ -250,7 +250,7 @@ export function Pricing() {
     <section className="section pricing" id="pricing">
       <div className="shell">
         <div className="sec-head">
-          <span className="sec-head__num">07</span>
+          <span className="sec-head__num">VII</span>
           <span className="sec-head__label">{PRICING.label}</span>
           <span className="sec-head__rule" />
         </div>

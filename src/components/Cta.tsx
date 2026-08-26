@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { CONTACTS, CTA, PRICING, TERRITORY } from '../content'
 import { Btn, Reveal } from './ui/primitives'
+import { Select } from './ui/Select'
 
 type Status = 'idle' | 'sending' | 'sent' | 'error'
 
@@ -76,7 +77,7 @@ export function Cta() {
       <span className="cta__aura" aria-hidden="true" />
       <div className="shell">
         <div className="sec-head">
-          <span className="sec-head__num">09</span>
+          <span className="sec-head__num">IX</span>
           <span className="sec-head__label">{CTA.label}</span>
           <span className="sec-head__rule" />
         </div>
@@ -143,18 +144,15 @@ export function Cta() {
                 </label>
 
                 <div className="form__pair">
-                  <label className="field">
+                  <div className="field">
                     <span className="field__label mono">Адрес</span>
-                    <select value={form.address} onChange={set('address')}>
-                      {TERRITORY.zones.map((z) => (
-                        <option key={z.name} value={z.name}>
-                          {z.name}
-                        </option>
-                      ))}
-                      <option value="Другой адрес">Другой адрес</option>
-                    </select>
-                    <span className="field__line" aria-hidden="true" />
-                  </label>
+                    <Select
+                      label="Адрес"
+                      value={form.address}
+                      options={[...TERRITORY.zones.map((z) => z.name), 'Другой адрес']}
+                      onChange={(address) => setForm((f) => ({ ...f, address }))}
+                    />
+                  </div>
 
                   <label className="field">
                     <span className="field__label mono">Площадь, соток</span>

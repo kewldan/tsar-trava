@@ -10,7 +10,7 @@ export function Territory() {
     <section className="section terr" id="territory">
       <div className="shell">
         <div className="sec-head">
-          <span className="sec-head__num">03</span>
+          <span className="sec-head__num">III</span>
           <span className="sec-head__label">{TERRITORY.label}</span>
           <span className="sec-head__rule" />
         </div>

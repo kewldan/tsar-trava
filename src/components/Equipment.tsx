@@ -44,7 +44,7 @@ export function Equipment() {
     <section className="section equip" id="equipment">
       <div className="shell">
         <div className="sec-head">
-          <span className="sec-head__num">05</span>
+          <span className="sec-head__num">V</span>
           <span className="sec-head__label">{EQUIPMENT.label}</span>
           <span className="sec-head__rule" />
         </div>

@@ -64,7 +64,7 @@ export function Process() {
       <div className="process__viewport">
         <div className="shell process__head-wrap">
           <div className="sec-head">
-            <span className="sec-head__num">04</span>
+            <span className="sec-head__num">IV</span>
             <span className="sec-head__label">Регламент</span>
             <span className="sec-head__rule" />
           </div>

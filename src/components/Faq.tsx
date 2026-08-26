@@ -32,7 +32,7 @@ export function Faq() {
     <section className="section faq" id="faq">
       <div className="shell">
         <div className="sec-head">
-          <span className="sec-head__num">08</span>
+          <span className="sec-head__num">VIII</span>
           <span className="sec-head__label">Вопросы</span>
           <span className="sec-head__rule" />
         </div>

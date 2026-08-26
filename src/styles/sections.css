@@ -446,7 +446,7 @@
 .manifest__aside figcaption .mono {
   font-size: 0.58rem;
 }
-.manifest__aside figcaption p {
+.manifest__aside figcaption .body-s {
   font-size: 0.85rem;
   max-width: 46ch;
 }
@@ -554,7 +554,7 @@
   .manifest__aside figcaption .mono {
     font-size: 0.58rem;
   }
-  .manifest__aside figcaption p {
+  .manifest__aside figcaption .body-s {
     font-size: 0.85rem;
     max-width: 46ch;
   }
@@ -2041,6 +2041,18 @@
 .plan__head {
   margin-bottom: clamp(22px, 2.6vw, 34px);
 }
+.plan.is-accent .plan__head::before {
+  content: "";
+  display: block;
+  width: 26px;
+  height: 26px;
+  margin-bottom: 14px;
+  background: var(--brass);
+  opacity: 0.85;
+  /* Ромб с вырезанной сердцевиной — знак отличия у главного тарифа */
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%, 50% 0%, 50% 16%, 16% 50%, 50% 84%, 84% 50%, 50% 16%);
+}
+
 .plan__name {
   font-family: var(--font-display);
   font-size: clamp(1.5rem, 2.1vw, 2.05rem);
@@ -2808,14 +2820,7 @@
     opacity 0.5s ease,
     filter 0.5s ease;
 }
-.form__foot {
-  opacity: 0.28;
-  filter: blur(2px);
-  pointer-events: none;
-}
-
-.form.is-sent .form__rows,
-.form.is-sent .field {
+.field {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -2931,6 +2936,14 @@
   width: 100%;
   justify-content: center;
 }
+/* После отправки поля гасим: на их месте появляется подтверждение */
+.form.is-sent .form__rows,
+.form.is-sent .form__foot {
+  opacity: 0.28;
+  filter: blur(2px);
+  pointer-events: none;
+}
+
 .form__legal {
   font-size: 0.52rem;
   line-height: 1.7;

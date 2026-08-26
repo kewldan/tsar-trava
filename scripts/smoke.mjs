@@ -170,6 +170,51 @@ try {
     })
     await page.waitForTimeout(700)
 
+    // Снимок принуждает нарисовать кадр: без кадров в headless не двигаются
+    // CSS-переходы, и половина блоков осталась бы «непроявленной»
+    await page.screenshot({ type: 'jpeg', quality: 1 })
+    await page.waitForTimeout(900)
+
+    // Кнопки не должны быть погашены или размыты: именно так выглядела
+    // регрессия, которую не ловят ни типы, ни линтер, ни разметка —
+    // правило блёкло уезжало не на тот селектор
+    const faded = await page.evaluate(() => {
+      /** Итоговая прозрачность и размытие с учётом всех предков. */
+      const effective = (el) => {
+        let node = el
+        let opacity = 1
+        let blurred = false
+        while (node && node !== document.body) {
+          const cs = getComputedStyle(node)
+          opacity *= Number.parseFloat(cs.opacity)
+          if (cs.filter?.includes('blur')) {
+            blurred = true
+          }
+          node = node.parentElement
+        }
+        return { opacity, blurred }
+      }
+
+      const bad = []
+      for (const el of document.querySelectorAll('.btn, .nav__link, .form__chip')) {
+        const r = el.getBoundingClientRect()
+        if (r.width < 4 || r.height < 4) {
+          continue
+        }
+        const { opacity, blurred } = effective(el)
+        // Полностью скрытые блоки (не проявившийся reveal) не считаем
+        if (opacity < 0.02) {
+          continue
+        }
+        if (blurred || opacity < 0.6) {
+          bad.push(`${el.className.split(' ')[0]} (прозрачность ${opacity.toFixed(2)}${blurred ? ', размыта' : ''})`)
+        }
+      }
+      return [...new Set(bad)].slice(0, 5)
+    })
+
+    check(faded.length === 0, 'кнопки не погашены и не размыты', faded.join(', '))
+
     check(problems.length === 0, 'консоль чистая', problems.slice(0, 4).join(' | '))
 
     if (page !== firstPage) {

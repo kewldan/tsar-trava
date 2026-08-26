@@ -76,7 +76,7 @@ export function Manifesto() {
     <section className="section manifest" id="manifest">
       <div className="shell">
         <div className="sec-head">
-          <span className="sec-head__num">01</span>
+          <span className="sec-head__num">I</span>
           <span className="sec-head__label">{MANIFESTO.label}</span>
           <span className="sec-head__rule" />
         </div>

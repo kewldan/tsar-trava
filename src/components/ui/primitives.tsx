@@ -231,3 +231,29 @@ export function Btn({
     </Magnetic>
   )
 }
+
+/* ── Церемониальный разделитель секций ──────────────────── */
+
+/**
+ * Заменяет простую линейку между секциями: две латунные нити, ромбы
+ * и монограмма посередине. Появляется семь раз за страницу и задаёт
+ * ритм «устава», а не лендинга.
+ */
+export function Ornament() {
+  return (
+    <div className="ornament shell" aria-hidden="true">
+      <span className="ornament__rule" />
+      <span className="ornament__lozenge" />
+      <span className="ornament__mark">
+        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.4">
+          <title>Монограмма ЦГ</title>
+          <path d="M16 26V13" strokeLinecap="round" />
+          <path d="M16 13c0-3.2 2.7-5.4 6.5-6 .6 3.7-1.7 7-6.5 6Z" strokeLinejoin="round" />
+          <path d="M16 17.2c0-2.8-2.3-4.7-5.6-5.1-.5 3.2 1.4 6 5.6 5.1Z" strokeLinejoin="round" />
+        </svg>
+      </span>
+      <span className="ornament__lozenge" />
+      <span className="ornament__rule" />
+    </div>
+  )
+}

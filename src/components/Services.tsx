@@ -115,7 +115,7 @@ export function Services() {
     <section className="section services" id="services">
       <div className="shell">
         <div className="sec-head">
-          <span className="sec-head__num">02</span>
+          <span className="sec-head__num">II</span>
           <span className="sec-head__label">Услуги</span>
           <span className="sec-head__rule" />
         </div>
@@ -129,7 +129,7 @@ export function Services() {
           <Reveal mode="fade" delay={180} className="services__note">
             <p className="body-s">
               Каждая работа имеет свой сезон и свою частоту. Мы не продаём аэрацию весной, если дёрн ещё не уплотнён,
-              и не косим в дождь, потому что мокрый лист рвётся.
+              и не косим в дождь, потому что мокрый лист рвётся. Отказать в работе — тоже часть работы.
             </p>
           </Reveal>
         </div>

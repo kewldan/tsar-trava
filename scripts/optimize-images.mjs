@@ -24,6 +24,7 @@ const flag = (name, fallback) => {
 const MAX_WIDTH = flag('width', 1600)
 const QUALITY = flag('quality', 0.72)
 const DRY = args.includes('--dry')
+const JPEG_EXT = /\.jpe?g$/i
 const ROOT = path.resolve('public')
 
 /** Рекурсивно собираемjpg-и, минуя всё остальное. */
@@ -33,7 +34,7 @@ function collect(dir) {
     const p = path.join(dir, entry.name)
     if (entry.isDirectory()) {
       out.push(...collect(p))
-    } else if (/\.jpe?g$/i.test(entry.name)) {
+    } else if (JPEG_EXT.test(entry.name)) {
       out.push(p)
     }
   }
