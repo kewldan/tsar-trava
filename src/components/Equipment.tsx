@@ -78,8 +78,8 @@ export function Equipment() {
               )}
             </div>
             <div className="equip__stage-meta">
-              <span className="mono">RUBIS 1F000 CLASSIC · ФИНИШНАЯ ДОВОДКА</span>
-              <span className="mono dim">Швейцария, хирургическая сталь — да, ими тоже стрижём</span>
+              <span className="mono">НОЖНИЦЫ · ФИНИШНАЯ ДОВОДКА</span>
+              <span className="mono dim">последние сантиметры у клумб и фонарей — вручную</span>
             </div>
             <span className="equip__cross equip__cross--tl" aria-hidden="true" />
             <span className="equip__cross equip__cross--tr" aria-hidden="true" />

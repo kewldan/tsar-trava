@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { BRAND, CONTACTS, NAV } from '../content'
-import { useActiveSection, useScrollProgress, useScrollTo } from '../lib/hooks'
+import { useActiveSection, useMediaQuery, useScrollProgress, useScrollTo } from '../lib/hooks'
 import { Btn, Magnetic } from './ui/primitives'
 
 function Mark() {
@@ -25,6 +25,8 @@ export function Nav() {
   const [stuck, setStuck] = useState(false)
   const [hidden, setHidden] = useState(false)
   const [open, setOpen] = useState(false)
+  // Брейкпоинт тот же, на котором меню уезжает в бургер
+  const isDesktop = useMediaQuery('(min-width: 1181px)')
   const progress = useScrollProgress()
   const ids = useMemo(() => NAV.map((n) => n.id), [])
   const active = useActiveSection(ids)
@@ -32,16 +34,41 @@ export function Nav() {
 
   useEffect(() => {
     let last = window.scrollY
+    // Накопитель хода в одну сторону. Реагировать на каждое событие нельзя:
+    // при прокрутке колесом по одному щелчку приходят мелкие разнонаправленные
+    // приращения, и шапка дёргалась.
+    let travel = 0
+
     const on = () => {
       const y = window.scrollY
       setStuck(y > 40)
-      // Прячем шапку при движении вниз, возвращаем при движении вверх
-      setHidden(y > 380 && y > last && y - last > 4)
+
+      const step = y - last
       last = y
+
+      // На десктопе шапка не прячется вовсе: места хватает,
+      // а навигация нужна под рукой на всей странице
+      if (isDesktop) {
+        setHidden(false)
+        return
+      }
+
+      // Смена направления обнуляет накопленное
+      if (step * travel < 0) {
+        travel = 0
+      }
+      travel += step
+
+      if (travel > 120) {
+        setHidden(y > 380)
+      } else if (travel < -70) {
+        setHidden(false)
+      }
     }
+
     window.addEventListener('scroll', on, { passive: true })
     return () => window.removeEventListener('scroll', on)
-  }, [])
+  }, [isDesktop])
 
   useEffect(() => {
     document.body.classList.toggle('is-locked', open)
