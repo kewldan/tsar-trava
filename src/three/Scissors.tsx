@@ -6,58 +6,118 @@ import { lerp } from '../lib/hooks'
 /**
  * Маникюрные ножницы — тот самый инструмент финишной доводки.
  *
- * Геометрия срисована с Rubis 1F000 Classic (Швейцария): общая длина 90 мм,
+ * Пропорции срисованы с Rubis 1F000 Classic (Швейцария): общая длина 90 мм,
  * хирургическая нержавеющая сталь, изогнутое лезвие примерно втрое короче
- * ручек, узкие вытянутые кольца. Готовые модели с бесплатных стоков не
- * подошли: там канцелярские ножницы одним слитым мешем, а здесь половинки
- * должны вращаться порознь.
+ * ручек, узкие вытянутые кольца.
  *
- * Строится процедурно: два лезвия из 2D-профиля через ExtrudeGeometry,
- * кольца с отверстием, винт по центру.
+ * Лезвие — не плоская пластина из ExtrudeGeometry, а параметрическая
+ * поверхность: вдоль идёт от винта к кончику, поперёк — от режущей кромки
+ * к обуху, и толщина сходит на нет и там, и там. Без этого клинок выглядит
+ * слябом: вся грань ловит один и тот же блик, и предмет читается плоским.
  *
  * Половинки вращаются вокруг оси винта, «щёлк» идёт по резкой кривой:
  * быстрое смыкание, медленное раскрытие — как у настоящих ножниц.
  */
 
-const EXTRUDE = {
-  depth: 0.05,
-  bevelEnabled: true,
-  bevelThickness: 0.012,
-  bevelSize: 0.012,
-  bevelSegments: 3,
-  curveSegments: 24,
+/** Точка на квадратичной кривой Безье. */
+function bez(p0: [number, number], p1: [number, number], p2: [number, number], t: number) {
+  const k = 1 - t
+  return [
+    k * k * p0[0] + 2 * k * t * p1[0] + t * t * p2[0],
+    k * k * p0[1] + 2 * k * t * p1[1] + t * t * p2[1],
+  ] as const
 }
 
-/** Половинка: изогнутое лезвие от винта к кончику + хвостовик к кольцу. */
-function bladeShape() {
+// Режущая кромка и обух сходятся в одной точке — кончике
+const EDGE: [[number, number], [number, number], [number, number]] = [
+  [0.12, -0.005],
+  [0.62, 0.03],
+  [1.04, 0.182],
+]
+const SPINE: [[number, number], [number, number], [number, number]] = [
+  [0.12, 0.118],
+  [0.6, 0.152],
+  [1.04, 0.182],
+]
+
+const BLADE_THICKNESS = 0.062
+
+/**
+ * Толщина в точке: 0 у самой кромки, максимум у обуха, и всё вместе
+ * убывает к кончику. Степени подобраны так, чтобы спуск был вогнутым,
+ * как у заточенного клинка, а не линейным клином.
+ */
+function thickness(u: number, v: number) {
+  return BLADE_THICKNESS * v ** 0.62 * (1 - 0.74 * u ** 1.45)
+}
+
+function bladeGeometry() {
+  const Along = 56 // сегментов вдоль лезвия
+  const Across = 10 // сегментов от кромки к обуху (на каждую сторону)
+  const Ring = Across * 2 // замкнутый профиль поперечного сечения
+
+  const pos: number[] = []
+  const idx: number[] = []
+
+  for (let iu = 0; iu <= Along; iu++) {
+    const u = iu / Along
+    const e = bez(EDGE[0], EDGE[1], EDGE[2], u)
+    const s = bez(SPINE[0], SPINE[1], SPINE[2], u)
+
+    // Обходим сечение по кругу: кромка → верхняя грань → обух →
+    // нижняя грань → обратно к кромке
+    for (let j = 0; j < Ring; j++) {
+      const half = j <= Across ? j / Across : (Ring - j) / Across
+      const sign = j <= Across ? 1 : -1
+      const v = half
+      const h = (thickness(u, v) / 2) * sign
+      pos.push(e[0] + (s[0] - e[0]) * v, e[1] + (s[1] - e[1]) * v, h)
+    }
+  }
+
+  for (let iu = 0; iu < Along; iu++) {
+    for (let j = 0; j < Ring; j++) {
+      const a = iu * Ring + j
+      const b = iu * Ring + ((j + 1) % Ring)
+      const c = (iu + 1) * Ring + j
+      const d = (iu + 1) * Ring + ((j + 1) % Ring)
+      idx.push(a, c, b, b, c, d)
+    }
+  }
+
+  const geo = new THREE.BufferGeometry()
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+  geo.setIndex(idx)
+  geo.computeVertexNormals()
+  return geo
+}
+
+const EXTRUDE = {
+  bevelEnabled: true,
+  bevelThickness: 0.01,
+  bevelSize: 0.01,
+  bevelSegments: 3,
+  curveSegments: 32,
+}
+
+/** Хвостовик: от винта назад к кольцу, к концу слегка расширяется. */
+function shankShape() {
   const s = new THREE.Shape()
-  // Режущая кромка идёт вогнутой дугой и к концу заворачивает вверх —
-  // у Rubis изгиб выражен сильнее, чем у прямых ногтевых ножниц
-  s.moveTo(0.15, -0.03)
-  s.bezierCurveTo(0.42, 0.0, 0.66, 0.08, 0.84, 0.21)
-  // Тонкий заострённый кончик
-  s.quadraticCurveTo(0.93, 0.275, 0.9, 0.315)
-  // Обух выпуклый: к кончику лезвие сходит почти на нет
-  s.bezierCurveTo(0.66, 0.235, 0.44, 0.17, 0.28, 0.13)
-  // Плечо у винта
-  s.quadraticCurveTo(0.2, 0.108, 0.15, 0.07)
-  // Длинный хвостовик уходит назад под кольцо, слегка расширяясь к нему
-  s.lineTo(-0.34, 0.015)
-  s.bezierCurveTo(-0.66, -0.02, -0.9, -0.09, -1.08, -0.23)
-  s.lineTo(-0.96, -0.36)
-  s.bezierCurveTo(-0.78, -0.24, -0.5, -0.15, -0.24, -0.11)
-  s.lineTo(0.09, -0.075)
+  s.moveTo(0.14, 0.1)
+  s.bezierCurveTo(-0.22, 0.05, -0.6, -0.02, -0.9, -0.17)
+  s.lineTo(-1.02, -0.33)
+  s.bezierCurveTo(-0.72, -0.21, -0.4, -0.14, -0.08, -0.09)
+  s.lineTo(0.14, -0.05)
   s.closePath()
   return s
 }
 
-/** Кольцо для пальца: эллипс с эллиптическим отверстием. */
+/** Кольцо для пальца: у маникюрных оно узкое и вытянутое, а не круглое. */
 function ringShape() {
   const outer = new THREE.Shape()
-  // Кольца у маникюрных ножниц узкие и вытянутые, а не круглые
-  outer.absellipse(0, 0, 0.44, 0.3, 0, Math.PI * 2, false, 0)
+  outer.absellipse(0, 0, 0.46, 0.3, 0, Math.PI * 2, false, 0)
   const hole = new THREE.Path()
-  hole.absellipse(0, 0, 0.33, 0.2, 0, Math.PI * 2, true, 0)
+  hole.absellipse(0, 0, 0.35, 0.2, 0, Math.PI * 2, true, 0)
   outer.holes.push(hole)
   return outer
 }
@@ -75,8 +135,9 @@ function Half({
 }) {
   const group = useRef<THREE.Group>(null)
 
-  const blade = useMemo(() => new THREE.ExtrudeGeometry(bladeShape(), EXTRUDE), [])
-  const ring = useMemo(() => new THREE.ExtrudeGeometry(ringShape(), { ...EXTRUDE, depth: 0.045 }), [])
+  const blade = useMemo(() => bladeGeometry(), [])
+  const shank = useMemo(() => new THREE.ExtrudeGeometry(shankShape(), { ...EXTRUDE, depth: 0.05 }), [])
+  const ring = useMemo(() => new THREE.ExtrudeGeometry(ringShape(), { ...EXTRUDE, depth: 0.05 }), [])
 
   useFrame(() => {
     const g = group.current
@@ -87,49 +148,70 @@ function Half({
   })
 
   return (
-    <group ref={group} position={[0, 0, side * 0.028]}>
+    <group ref={group} position={[0, 0, side * 0.03]}>
       <mesh geometry={blade} material={steel} scale={[1, side, 1]} />
-      <mesh geometry={ring} material={brass} position={[-1.44, side * -0.56, 0]} rotation={[0, 0, side * -0.42]} />
+      <mesh geometry={shank} material={steel} scale={[1, side, 1]} position={[0, 0, -0.025]} />
+      <mesh
+        geometry={ring}
+        material={brass}
+        position={[-1.4, side * -0.54, -0.025]}
+        rotation={[0, 0, side * -0.42]}
+      />
     </group>
   )
 }
 
-/** Процедурная студия: тёплый софтбокс сверху-слева, зелёный отскок снизу. */
+/**
+ * Процедурная студия для отражений.
+ *
+ * Полированный металл виден только через то, что в нём отражается: без
+ * окружения он читается почти чёрным. Поэтому в панораме есть крупный
+ * софтбокс и узкая яркая полоса — она даёт тот самый вытянутый блик
+ * вдоль клинка, по которому глаз и опознаёт сталь.
+ */
 function StudioEnv() {
   const gl = useThree((s) => s.gl)
   const scene = useThree((s) => s.scene)
 
   useEffect(() => {
     const c = document.createElement('canvas')
-    c.width = 512
-    c.height = 256
+    c.width = 1024
+    c.height = 512
     const ctx = c.getContext('2d')
     if (!ctx) {
       return
     }
 
-    const g = ctx.createLinearGradient(0, 0, 0, 256)
-    g.addColorStop(0, '#3c3527')
-    g.addColorStop(0.4, '#161d18')
-    g.addColorStop(0.62, '#0a0f0c')
-    g.addColorStop(1, '#0f2a1b')
+    const g = ctx.createLinearGradient(0, 0, 0, 512)
+    g.addColorStop(0, '#5b5342')
+    g.addColorStop(0.36, '#232c25')
+    g.addColorStop(0.6, '#0c1310')
+    g.addColorStop(1, '#163a24')
     ctx.fillStyle = g
-    ctx.fillRect(0, 0, 512, 256)
+    ctx.fillRect(0, 0, 1024, 512)
 
     // Софтбокс — главный источник бликов на лезвии
-    const key = ctx.createRadialGradient(150, 42, 4, 150, 42, 130)
-    key.addColorStop(0, '#fff6e2')
-    key.addColorStop(0.45, '#c8a96a')
+    const key = ctx.createRadialGradient(300, 74, 8, 300, 74, 260)
+    key.addColorStop(0, '#fffdf6')
+    key.addColorStop(0.35, '#e8d9b4')
     key.addColorStop(1, 'rgba(200,169,106,0)')
     ctx.fillStyle = key
-    ctx.fillRect(0, 0, 512, 200)
+    ctx.fillRect(0, 0, 1024, 380)
 
-    // Контровой справа-сзади
-    const rim = ctx.createRadialGradient(400, 96, 2, 400, 96, 90)
-    rim.addColorStop(0, '#e3c88f')
+    // Узкая яркая полоса: вытянутый блик вдоль полированной грани
+    const strip = ctx.createLinearGradient(0, 150, 0, 210)
+    strip.addColorStop(0, 'rgba(255,252,240,0)')
+    strip.addColorStop(0.5, 'rgba(255,252,240,0.95)')
+    strip.addColorStop(1, 'rgba(255,252,240,0)')
+    ctx.fillStyle = strip
+    ctx.fillRect(0, 150, 1024, 60)
+
+    // Контровой справа-сзади, латунный
+    const rim = ctx.createRadialGradient(800, 200, 4, 800, 200, 190)
+    rim.addColorStop(0, '#f2dcae')
     rim.addColorStop(1, 'rgba(227,200,143,0)')
     ctx.fillStyle = rim
-    ctx.fillRect(256, 0, 256, 220)
+    ctx.fillRect(560, 40, 464, 380)
 
     const tex = new THREE.CanvasTexture(c)
     tex.mapping = THREE.EquirectangularReflectionMapping
@@ -158,10 +240,10 @@ function ScissorsModel({ speedRef }: { speedRef: React.RefObject<number> }) {
   const steel = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: '#e8ecef',
+        color: '#f0f3f5',
         metalness: 1,
-        roughness: 0.11,
-        envMapIntensity: 2.4,
+        roughness: 0.09,
+        envMapIntensity: 3.1,
       }),
     [],
   )
@@ -170,12 +252,13 @@ function ScissorsModel({ speedRef }: { speedRef: React.RefObject<number> }) {
       new THREE.MeshStandardMaterial({
         color: '#c8a96a',
         metalness: 1,
-        roughness: 0.2,
-        envMapIntensity: 2.1,
+        roughness: 0.17,
+        envMapIntensity: 2.6,
       }),
     [],
   )
-  const screw = useMemo(() => new THREE.CylinderGeometry(0.075, 0.075, 0.14, 24), [])
+  const screw = useMemo(() => new THREE.CylinderGeometry(0.082, 0.082, 0.19, 28), [])
+  const screwSlot = useMemo(() => new THREE.BoxGeometry(0.11, 0.016, 0.02), [])
 
   useFrame((state, delta) => {
     const g = root.current
@@ -193,18 +276,19 @@ function ScissorsModel({ speedRef }: { speedRef: React.RefObject<number> }) {
     const snip = cycle < 0.18 ? 1 - cycle / 0.18 : (cycle - 0.18) / 0.82
     angle.current = lerp(angle.current, 0.035 + snip * 0.2, 0.25)
 
-    g.rotation.y = lerp(g.rotation.y, -0.35 + state.pointer.x * 0.55, 0.05)
-    g.rotation.x = lerp(g.rotation.x, -0.18 + state.pointer.y * 0.3, 0.05)
-    g.rotation.z = Math.sin(t.current * 0.3) * 0.09
+    g.rotation.y = lerp(g.rotation.y, -0.42 + state.pointer.x * 0.5, 0.05)
+    g.rotation.x = lerp(g.rotation.x, -0.16 + state.pointer.y * 0.28, 0.05)
+    g.rotation.z = Math.sin(t.current * 0.3) * 0.08
     g.position.y = Math.sin(t.current * 0.55) * 0.06
   })
 
   return (
-    <group ref={root} position={[0.3, 0, 0]} scale={0.88}>
+    <group ref={root} position={[0.32, 0, 0]} scale={0.92}>
       <Half side={1} angleRef={angle} steel={steel} brass={brass} />
       <Half side={-1} angleRef={angle} steel={steel} brass={brass} />
-      {/* Винт */}
+      {/* Винт с прорезью — по нему читается ось вращения */}
       <mesh geometry={screw} rotation={[Math.PI / 2, 0, 0]} material={brass} />
+      <mesh geometry={screwSlot} position={[0, 0, 0.096]} material={brass} />
     </group>
   )
 }
@@ -217,12 +301,11 @@ export function Scissors({ speedRef }: { speedRef: React.RefObject<number> }) {
       camera={{ fov: 32, position: [0, 0.05, 5.4] }}
     >
       <StudioEnv />
-      <ambientLight intensity={0.32} color="#20402f" />
-      {/* Ключевой сверху-слева, латунный контровой справа-сзади, зелёный отражённый снизу */}
-      <directionalLight position={[-4, 5, 4]} intensity={2.4} color="#fff4dc" />
-      <directionalLight position={[5, 1.5, -4]} intensity={3.4} color="#c8a96a" />
-      <directionalLight position={[2, -3, 3]} intensity={1.2} color="#2f8a55" />
-      <pointLight position={[0, 0, 3]} intensity={7} distance={10} color="#e3c88f" />
+      <ambientLight intensity={0.25} color="#20402f" />
+      {/* Ключевой сверху-слева, латунный контровой справа-сзади */}
+      <directionalLight position={[-4, 5, 4]} intensity={2.2} color="#fff4dc" />
+      <directionalLight position={[5, 1.5, -4]} intensity={2.8} color="#c8a96a" />
+      <directionalLight position={[2, -3, 3]} intensity={1} color="#2f8a55" />
       <ScissorsModel speedRef={speedRef} />
     </Canvas>
   )
