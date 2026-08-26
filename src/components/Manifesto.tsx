@@ -88,6 +88,25 @@ export function Manifesto() {
             <Reveal mode="fade" delay={120} className="manifest__sign">
               <span className="mono dim">{MANIFESTO.signature}</span>
             </Reveal>
+
+            {/* Сноска к манифесту: шутка заявлена прямо в подписи,
+                поэтому кадр не может сойти за настоящую заслугу */}
+            <Reveal mode="fade" delay={180} className="manifest__aside">
+              <figure>
+                <img
+                  src={asset(MANIFESTO.aside.photo)}
+                  alt={MANIFESTO.aside.alt}
+                  width={768}
+                  height={1376}
+                  loading="lazy"
+                  decoding="async"
+                />
+                <figcaption>
+                  <span className="mono brass">{MANIFESTO.aside.title}</span>
+                  <p className="body-s">{MANIFESTO.aside.text}</p>
+                </figcaption>
+              </figure>
+            </Reveal>
           </div>
 
           {/* Снимок с выезда рядом с утверждением: заявление и подтверждение в одном экране */}

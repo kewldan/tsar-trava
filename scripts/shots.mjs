@@ -32,6 +32,7 @@ const MIME = {
 const DESKTOP = [
   { file: 'hero', top: 0 },
   { file: 'manifest', id: 'manifest', extra: 0.55 },
+  { file: 'aside', id: 'manifest', extra: 0.95 },
   { file: 'stats', id: 'manifest', extra: 1.42 },
   { file: 'services', id: 'services', extra: 0.42 },
   { file: 'territory', id: 'territory', extra: 0.62 },
@@ -127,8 +128,13 @@ async function shoot(list, { width, height, quality }) {
   for (const shot of list) {
     await scrollToShot(page, shot)
 
-    // Ждём, пока доиграют reveal-анимации секции
+    // Прогревочный снимок: в headless браузер не рисует кадры сам по себе,
+    // а без кадров CSS-переходы не двигаются — секция попадала в кадр
+    // непроявленной. Снимок принуждает нарисовать кадр, дальше переходы
+    // доигрывают за отведённую паузу.
+    await page.screenshot({ type: 'jpeg', quality: 1 })
     await page.waitForTimeout(1900)
+
     const file = path.join(OUT, `${shot.file}.jpg`)
     await page.screenshot({ path: file, type: 'jpeg', quality })
     const kb = (fs.statSync(file).size / 1024).toFixed(0)
